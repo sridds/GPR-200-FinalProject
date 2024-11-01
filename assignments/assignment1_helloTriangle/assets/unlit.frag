@@ -1,8 +1,9 @@
 #version 330 core
 out vec4 FragColor;
 
-uniform vec3 _Color;
+in vec4 Color;
+uniform float _Time;
 
 void main(){
-	FragColor = vec4(_Color,1.0);
+	FragColor = vec4(Color.rgb * (sin(_Time)*0.5+0.5),1.0);
 }
