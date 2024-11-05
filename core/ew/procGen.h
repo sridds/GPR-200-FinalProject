@@ -7,5 +7,6 @@
 #include "mesh.h"
 
 namespace ew {
-	MeshData createCube(float size);
+	void createCube(float size, MeshData* meshData);
+	void createPlaneXY(float width, float height, int subDivisions, MeshData* meshData);
 }

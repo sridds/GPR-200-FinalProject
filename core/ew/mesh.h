@@ -8,14 +8,23 @@
 
 namespace ew {
 	struct Vertex {
-		glm::vec3 pos;
-		glm::vec3 normal;
-		glm::vec2 uv;
+		glm::vec3 pos = glm::vec3(0);
+		glm::vec3 normal = glm::vec3(0);
+		glm::vec2 uv = glm::vec2(0);
+		Vertex() {
+
+		}
+		Vertex(const glm::vec3& pos, const glm::vec3& normal, const glm::vec2& uv):
+			pos(pos),normal(normal),uv(uv){
+		}
 	};
 
 	struct MeshData {
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
+		MeshData() {
+
+		}
 	};
 
 	enum class DrawMode {

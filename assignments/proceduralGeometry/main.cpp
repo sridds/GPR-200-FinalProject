@@ -24,12 +24,9 @@ const int SCREEN_HEIGHT = 720;
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-const int NUM_CUBES = 20;
-
-glm::vec3 cubePositions[NUM_CUBES];
 
 //CAMERA
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float yaw = -90.0f, pitch = 0;
@@ -41,7 +38,7 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 float orthoHeight = 10.0f;
 
-glm::vec3 lightPosition = glm::vec3(0);
+glm::vec3 lightPosition = glm::vec3(0.0f,1.5f,0.0f);
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
 	float ambientK = 0.1f;
@@ -50,6 +47,9 @@ struct Material {
 	float shininess = 64.0f;
 	bool blinnPhong = true;
 } material;
+
+bool wireFrame = false;
+bool pointRender = false;
 
 int main() {
 	printf("Initializing...");
@@ -80,46 +80,41 @@ int main() {
 
 	//Initialization goes here!
 	ew::MeshData cubeMeshData;
+	ew::MeshData planeMeshData;
 	ew::createCube(1.0f, &cubeMeshData);
+	ew::createPlaneXY(10.0f, 10.0f, 5, &planeMeshData);
 	ew::Mesh cubeMesh = ew::Mesh(cubeMeshData);
+	ew::Mesh planeMesh = ew::Mesh(planeMeshData);
 
 	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader unlitShader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
 	unsigned int brickTex = ew::loadTexture("assets/brick.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glBindTexture(GL_TEXTURE_2D, brickTex);
-	float cubeFieldRadius = 5.0f;
-
-	for (size_t i = 0; i < NUM_CUBES; i++)
-	{
-		cubePositions[i] = glm::vec3(
-			ew::RandomRange(-cubeFieldRadius, cubeFieldRadius), 
-			ew::RandomRange(-cubeFieldRadius, cubeFieldRadius), 
-			ew::RandomRange(-cubeFieldRadius, cubeFieldRadius));
-	}
-	
+	glPointSize(4.0);
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		processInput(window);
 
+		float currentFrame = (float)glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		//Clear framebuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-		float time = (float)glfwGetTime();
+	
 
-		litShader.use();
+		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
+		litShader.use();
 		litShader.setVec3("_ViewPos", cameraPos);
 		litShader.setMat4("_ViewProjection", projMatrix * view);
 		litShader.setVec3("_LightColor", lightColor);
@@ -130,17 +125,12 @@ int main() {
 		litShader.setFloat("_Material.shininess", material.shininess);
 		litShader.setInt("_Material.blinnPhong", material.blinnPhong);
 
-		//Draw Field of Cubes
-		for (unsigned int i = 0; i < NUM_CUBES; i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			model = glm::scale(model, glm::vec3(i / 20.0f + 0.1f));
-			litShader.setMat4("_Model", model);
-			cubeMesh.draw();
-		}
+		//Draw plane
+		glm::mat4 planeTransform = glm::mat4(1);
+		planeTransform = glm::rotate(planeTransform, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		planeTransform = glm::translate(planeTransform,glm::vec3(-5.0,-5.0,0.0));
+		litShader.setMat4("_Model", planeTransform);
+		planeMesh.draw(drawMode);
 
 		//Draw light source as cube
 		glm::mat4 model = glm::mat4(1.0f);
@@ -150,7 +140,7 @@ int main() {
 		unlitShader.setMat4("_ViewProjection", projMatrix * view);
 		unlitShader.setMat4("_Model", model);
 		unlitShader.setVec3("_Color", lightColor);
-		cubeMesh.draw();
+		cubeMesh.draw(drawMode);
 
 		//Start drawing ImGUI
 		ImGui_ImplGlfw_NewFrame();
@@ -165,6 +155,10 @@ int main() {
 		ImGui::SliderFloat("Diffuse K", &material.diffuseK, 0.0f, 1.0f);
 		ImGui::SliderFloat("Specular K", &material.specularK, 0.0f, 1.0f);
 		ImGui::SliderFloat("Shininess", &material.shininess, 2.0f, 1024);
+		if (ImGui::Checkbox("Wireframe", &wireFrame)) {
+			glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
+		}
+		ImGui::Checkbox("Draw as Points", &pointRender);
 		ImGui::End();
 
 		//Actually render IMGUI elements using OpenGL
