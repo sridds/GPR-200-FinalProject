@@ -8,5 +8,4 @@
 
 namespace ew {
 	MeshData createCube(float size);
-	MeshData createPlane(float width, float height, int subDivisions);
 }
