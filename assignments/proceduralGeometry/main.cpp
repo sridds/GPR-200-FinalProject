@@ -25,6 +25,30 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
+struct Transform {
+	glm::vec3 position;
+	glm::vec3 rotation; //Euler angles
+	glm::vec3 scale;
+	float rotationAngle;
+	glm::mat4 getModelMatrix() {
+		//Create identity Matrix
+		glm::mat4 model = glm::mat4(1.0f);
+
+		//Translation model
+		model = glm::translate(model, position);
+
+		//Rotation model
+		if (rotation != glm::vec3(0)) {
+			model = glm::rotate(model, glm::radians(rotationAngle), rotation);
+		}
+
+		//Scale model
+		model = glm::scale(model, scale);
+
+		return model;
+	}
+};
+
 //CAMERA
 glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -38,7 +62,8 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 float orthoHeight = 10.0f;
 
-glm::vec3 lightPosition = glm::vec3(0.0f,1.5f,0.0f);
+Transform lightTransform;
+Transform planeTransform;
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
 	float ambientK = 0.1f;
@@ -108,6 +133,10 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+		//Set default light transform
+		lightTransform.position = glm::vec3(0.0f, 1.5f, 0.0f);
+		lightTransform.rotation = glm::vec3(1);
+		lightTransform.scale = glm::vec3(1);
 
 		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 
@@ -118,7 +147,7 @@ int main() {
 		litShader.setVec3("_ViewPos", cameraPos);
 		litShader.setMat4("_ViewProjection", projMatrix * view);
 		litShader.setVec3("_LightColor", lightColor);
-		litShader.setVec3("_LightPos", lightPosition);
+		litShader.setVec3("_LightPos", lightTransform.position);
 		litShader.setFloat("_Material.ambientK", material.ambientK);
 		litShader.setFloat("_Material.diffuseK", material.diffuseK);
 		litShader.setFloat("_Material.specularK", material.specularK);
@@ -126,19 +155,17 @@ int main() {
 		litShader.setInt("_Material.blinnPhong", material.blinnPhong);
 
 		//Draw plane
-		glm::mat4 planeTransform = glm::mat4(1);
-		planeTransform = glm::rotate(planeTransform, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		planeTransform = glm::translate(planeTransform,glm::vec3(-5.0,-5.0,0.0));
-		litShader.setMat4("_Model", planeTransform);
+		planeTransform.rotation = glm::vec3(1.0f, 0.0f, 0.0f);
+		planeTransform.rotationAngle = -90.0f;
+		planeTransform.position = glm::vec3(0.0f);
+		planeTransform.scale = glm::vec3(3.0f, 3.0f, 1.0f);
+		litShader.setMat4("_Model", planeTransform.getModelMatrix());
 		planeMesh.draw(drawMode);
 
 		//Draw light source as cube
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPosition);
-		model = glm::scale(model, glm::vec3(0.5f));
 		unlitShader.use();
 		unlitShader.setMat4("_ViewProjection", projMatrix * view);
-		unlitShader.setMat4("_Model", model);
+		unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
 		unlitShader.setVec3("_Color", lightColor);
 		cubeMesh.draw(drawMode);
 
@@ -149,7 +176,7 @@ int main() {
 
 		//Create a window called Settings.
 		ImGui::Begin("Settings");
-		ImGui::DragFloat3("Light Position", &lightPosition.x, 0.1f);
+		ImGui::DragFloat3("Light Position", &lightTransform.position.x, 0.1f);
 		ImGui::ColorEdit3("Light Color", &lightColor.r);
 		ImGui::SliderFloat("Ambient K", &material.ambientK, 0.0f, 1.0f);
 		ImGui::SliderFloat("Diffuse K", &material.diffuseK, 0.0f, 1.0f);
