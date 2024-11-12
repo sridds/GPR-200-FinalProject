@@ -29,7 +29,11 @@ void main(){
     vec3 lightDir = normalize(_LightPos - WorldPos);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * _LightColor * _Material.diffuseK;
+
+    //Take dot product of two vectors and put into cosine
+    float shadingIntensity = cos(dot(norm, lightDir));
     
+
     // specular
     float specularStrength = _Material.specularK;
     vec3 viewDir = normalize(_ViewPos - WorldPos);
