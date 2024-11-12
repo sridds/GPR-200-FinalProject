@@ -64,6 +64,8 @@ float orthoHeight = 10.0f;
 
 Transform lightTransform;
 Transform planeTransform;
+Transform sphereTransform;
+
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
 	float ambientK = 0.1f;
@@ -106,10 +108,13 @@ int main() {
 	//Initialization goes here!
 	ew::MeshData cubeMeshData;
 	ew::MeshData planeMeshData;
+	ew::MeshData sphereMeshData;
 	ew::createCube(1.0f, &cubeMeshData);
 	ew::createPlaneXY(10.0f, 10.0f, 5, &planeMeshData);
+	ew::createSphere(2.0f, 64, &sphereMeshData);
 	ew::Mesh cubeMesh = ew::Mesh(cubeMeshData);
 	ew::Mesh planeMesh = ew::Mesh(planeMeshData);
+	ew::Mesh sphereMesh = ew::Mesh(sphereMeshData);
 
 	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader unlitShader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
@@ -161,6 +166,13 @@ int main() {
 		planeTransform.scale = glm::vec3(3.0f, 3.0f, 1.0f);
 		litShader.setMat4("_Model", planeTransform.getModelMatrix());
 		planeMesh.draw(drawMode);
+
+		// draw sphere
+		glm::mat4 transform = glm::mat4(1);
+		sphereTransform.position = glm::vec3(5.0f, 3.0f, 1.0f);
+		sphereTransform.scale = glm::vec3(1.0f);
+		litShader.setMat4("_Model", sphereTransform.getModelMatrix());
+		sphereMesh.draw(drawMode);
 
 		//Draw light source as cube
 		unlitShader.use();

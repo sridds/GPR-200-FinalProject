@@ -9,4 +9,5 @@
 namespace ew {
 	void createCube(float size, MeshData* meshData);
 	void createPlaneXY(float width, float height, int subDivisions, MeshData* meshData);
+	void createSphere(float radius, int subDivisions, MeshData* mesh);
 }
