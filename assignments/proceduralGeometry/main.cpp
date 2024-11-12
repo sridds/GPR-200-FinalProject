@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-
+#include <ew/transform.h>
 #include <ew/procGen.h>
 #include <ew/shader.h>
 #include <ew/texture.h>
@@ -24,30 +24,6 @@ const int SCREEN_HEIGHT = 720;
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-struct Transform {
-	glm::vec3 position;
-	glm::vec3 rotation; //Euler angles
-	glm::vec3 scale;
-	float rotationAngle;
-	glm::mat4 getModelMatrix() {
-		//Create identity Matrix
-		glm::mat4 model = glm::mat4(1.0f);
-
-		//Translation model
-		model = glm::translate(model, position);
-
-		//Rotation model
-		if (rotation != glm::vec3(0)) {
-			model = glm::rotate(model, glm::radians(rotationAngle), rotation);
-		}
-
-		//Scale model
-		model = glm::scale(model, scale);
-
-		return model;
-	}
-};
 
 //CAMERA
 glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 3.0f);
