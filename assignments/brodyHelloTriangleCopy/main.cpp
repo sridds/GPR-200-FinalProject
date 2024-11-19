@@ -18,8 +18,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "../core/ew/transform.h"
-
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const int MAZE_SIZE = 5;
@@ -61,7 +59,7 @@ int main() {
 		return 1;
 	}
 	
-	ew::Shader shader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
+	ew::Shader shader = ew::Shader("assets/maze.vert", "assets/maze.frag");
 	unsigned int VAO, VBO, EBO;
 
 	glGenVertexArrays(1, &VAO);
@@ -96,7 +94,12 @@ int main() {
 		{
 			for (int j = 0; j < MAZE_SIZE; j++)
 			{
-				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+				if (tempMaze[i][j] == 1)
+				{
+					shader.setInt("posX", i);
+					shader.setInt("posY", -1 * j);
+					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+				}
 			}
 		}
 
