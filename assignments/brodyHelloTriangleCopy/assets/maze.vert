@@ -4,8 +4,8 @@ layout(location = 1) in vec4 aColor;
 
 out vec4 Color;
 uniform float _Time;
-uniform int posX;
-uniform int posY;
+uniform float posX;
+uniform float posY;
 
 void main(){
     vec3 pos = aPos;

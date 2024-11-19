@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <stdio.h>
 #include <math.h>
 
@@ -20,13 +21,14 @@
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const int MAZE_SIZE = 5;
+const int MAZE_SIZE = 9;
+const float WALL_SIZE = 0.05f;
 
 float vertices[] = {
-	 0.5f,  0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	-0.5f, -0.5f, 0.0f,
-	-0.5f,  0.5f, 0.0f
+	 WALL_SIZE,  WALL_SIZE, 0.0f,
+	 WALL_SIZE, -WALL_SIZE, 0.0f,
+	-WALL_SIZE, -WALL_SIZE, 0.0f,
+	-WALL_SIZE,  WALL_SIZE, 0.0f
 };
 
 unsigned int indices[] = {
@@ -35,11 +37,15 @@ unsigned int indices[] = {
 };
 
 float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
-	{1, 1, 0, 1, 1},
-	{1, 1, 0, 1, 1},
-	{0, 0, 0, 0, 0},
-	{1, 1, 0, 1, 1},
-	{1, 1, 0, 1, 1}
+	{0, 1, 1, 1, 0, 1, 1, 1, 0},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{0, 1, 1, 1, 1, 1, 1, 1, 0},
+	{0, 0, 1, 1, 1, 1, 1, 0, 0},
+	{0, 0, 0, 1, 1, 1, 0, 0, 0},
+	{0, 0, 0, 0, 1, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 
 int main() {
@@ -78,6 +84,23 @@ int main() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
 	glEnableVertexAttribArray(0);
 
+	// create random colors
+	float colValues[MAZE_SIZE][MAZE_SIZE];
+
+	for (int j = 0; j < MAZE_SIZE; j++)
+	{
+		for (int i = 0; i < MAZE_SIZE; i++)
+		{
+			srand(rand());
+
+			int val = rand() % 100 + 1;
+			float awesomeSauce = val / 100.0f;
+
+			colValues[i][j] = awesomeSauce;
+		}
+	}
+
+
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -90,14 +113,18 @@ int main() {
 		shader.use();
 		shader.setFloat("_Time", time); 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		// reading through tempMaze matrix
 		for (int i = 0; i < MAZE_SIZE; i++)
 		{
 			for (int j = 0; j < MAZE_SIZE; j++)
 			{
 				if (tempMaze[i][j] == 1)
 				{
-					shader.setInt("posX", i);
-					shader.setInt("posY", -1 * j);
+					// supply position of matrix element to vertex shader, accounting for diameter of each wall
+					shader.setFloat("posX", j * (WALL_SIZE * 2));
+					shader.setFloat("posY", -i * (WALL_SIZE * 2));
+					shader.setFloat("colFloat", colValues[i][j]);
+
 					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 				}
 			}
