@@ -19,6 +19,13 @@ struct Material{
 };
 uniform Material _Material;
 
+//Toon Shading
+uniform bool _ToonShadingEnabled;
+uniform bool _RimLightingEnabled;
+
+uniform int _ToonLevels = 4;
+float _ToonScale = 1.0 / _ToonLevels;
+
 void main(){
     // ambient
     float ambientStrength =_Material.ambientK;
@@ -27,16 +34,26 @@ void main(){
     // diffuse 
     vec3 norm = normalize(WorldNormal);
     vec3 lightDir = normalize(_LightPos - WorldPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * _LightColor * _Material.diffuseK;
+    float diffIntensity = max(dot(norm, lightDir), 0.0);
+
+    if (_ToonShadingEnabled)
+    {
+        diffIntensity = floor(diffIntensity * _ToonLevels) * _ToonScale;
+    }
+   
+    vec3 diffuseColor = _LightColor * _Material.diffuseK * diffIntensity;
 
     //Take dot product of two vectors and put into cosine
     float shadingIntensity = cos(dot(norm, lightDir));
-    
 
     // specular
     float specularStrength = _Material.specularK;
+
     vec3 viewDir = normalize(_ViewPos - WorldPos);
+    //vec3 halfwayDir = normalize(lightDir + viewDir);  
+    //specularStrength = clamp(dot(norm, halfwayDir), 0.0, 1.0);
+    //specularStrength = step(0.98, specularStrength);
+    
     //vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = 0;
     if(_Material.blinnPhong == 1)
@@ -50,8 +67,6 @@ void main(){
         spec = pow(max(dot(viewDir, reflectDir), 0.0),  _Material.shininess);
     }
     vec3 specular = specularStrength * spec * _LightColor;  
-    vec3 result = (ambient + diffuse + specular) * texture(_MainTex,TexCoord).rgb;
-
-	//FragColor =;
+    vec3 result = (ambient + diffuseColor + specular) * texture(_MainTex,TexCoord).rgb;
 	FragColor = vec4(result,1.0);
 }
