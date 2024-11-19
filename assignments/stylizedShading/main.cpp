@@ -54,6 +54,13 @@ struct Material {
 bool wireFrame = false;
 bool pointRender = false;
 
+//Toon shading Settings
+bool isToonShading = true;
+int toonShadingLevels = 4;
+
+bool isRimLighting = false;
+float rimLightFalloff = 8.0;
+
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -101,6 +108,17 @@ int main() {
 	glCullFace(GL_BACK);
 	glBindTexture(GL_TEXTURE_2D, brickTex);
 	glPointSize(4.0);
+
+	//Set default light transform
+	lightTransform.position = glm::vec3(0.0f, 1.5f, 0.0f);
+	lightTransform.rotation = glm::vec3(1);
+	lightTransform.scale = glm::vec3(1);
+
+	//Set Plane transform
+	planeTransform.rotation = glm::vec3(1.0f, 0.0f, 0.0f);
+	planeTransform.rotationAngle = -90.0f;
+	planeTransform.position = glm::vec3(0.0f);
+	planeTransform.scale = glm::vec3(3.0f, 3.0f, 1.0f);
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -113,16 +131,13 @@ int main() {
 		//Clear framebuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-		//Set default light transform
-		lightTransform.position = glm::vec3(0.0f, 1.5f, 0.0f);
-		lightTransform.rotation = glm::vec3(1);
-		lightTransform.scale = glm::vec3(1);
 
 		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
+
+		//rimLightFalloff = glm::clamp((abs(cos(currentFrame) * 8.0f)), 6.0f, 8.0f);
 
 		litShader.use();
 		litShader.setVec3("_ViewPos", cameraPos);
@@ -135,16 +150,17 @@ int main() {
 		litShader.setFloat("_Material.shininess", material.shininess);
 		litShader.setInt("_Material.blinnPhong", material.blinnPhong);
 
+		//Set Toon settings
+		litShader.setInt("_ToonShadingEnabled", isToonShading);
+		litShader.setInt("_ToonLevels", toonShadingLevels);
+		litShader.setInt("_RimLightingEnabled", isRimLighting);
+		litShader.setFloat("_RimLightFalloff", rimLightFalloff);
+
 		//Draw plane
-		planeTransform.rotation = glm::vec3(1.0f, 0.0f, 0.0f);
-		planeTransform.rotationAngle = -90.0f;
-		planeTransform.position = glm::vec3(0.0f);
-		planeTransform.scale = glm::vec3(3.0f, 3.0f, 1.0f);
 		litShader.setMat4("_Model", planeTransform.getModelMatrix());
 		planeMesh.draw(drawMode);
 
 		// draw sphere
-		glm::mat4 transform = glm::mat4(1);
 		sphereTransform.position = glm::vec3(5.0f, 3.0f, 1.0f);
 		sphereTransform.scale = glm::vec3(1.0f);
 		litShader.setMat4("_Model", sphereTransform.getModelMatrix());
@@ -174,6 +190,12 @@ int main() {
 			glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
 		}
 		ImGui::Checkbox("Draw as Points", &pointRender);
+		if (ImGui::CollapsingHeader("Toon Shading Settings")) {
+			ImGui::Checkbox("Enable Toon Shading", &isToonShading);
+			ImGui::SliderInt("Toon Levels", &toonShadingLevels, 2.0f, 64.0f);
+			ImGui::Checkbox("Enable Rim Lighting", &isRimLighting);
+			ImGui::SliderFloat("Rim Lighting Falloff", &rimLightFalloff, 0.0f, 64.0f);
+		}
 		ImGui::End();
 
 		//Actually render IMGUI elements using OpenGL
