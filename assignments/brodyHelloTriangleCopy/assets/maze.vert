@@ -1,14 +1,14 @@
 #version 330 core
 layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec4 aColor;
 
-out vec4 Color;
-uniform float _Time;
 uniform float posX;
 uniform float posY;
+uniform float scaleX;
 
-void main(){
-    vec3 pos = aPos;
-	gl_Position = vec4((pos.x + posX), (pos.y + posY), pos.z,1.0);
-	Color = aColor;
+void main()
+{
+	vec3 scaledPos = vec3(aPos.x * scaleX, aPos.y, aPos.z);
+    vec3 finalPos = scaledPos + vec3(posX, posY, 0.0);
+
+    gl_Position = vec4(finalPos, 1.0);
 }

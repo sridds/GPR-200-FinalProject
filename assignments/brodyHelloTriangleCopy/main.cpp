@@ -21,14 +21,14 @@
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const int MAZE_SIZE = 9;
-const float WALL_SIZE = 0.05f;
+const int MAZE_SIZE = 19;
+const float WALL_SIZE = 0.02f;
 
 float vertices[] = {
-	 WALL_SIZE,  WALL_SIZE, 0.0f,
-	 WALL_SIZE, -WALL_SIZE, 0.0f,
-	-WALL_SIZE, -WALL_SIZE, 0.0f,
-	-WALL_SIZE,  WALL_SIZE, 0.0f
+	 0.5f,  WALL_SIZE, 0.0f, // top right
+	 0.5f, -WALL_SIZE, 0.0f, // bottom right
+	 -0.5f, -WALL_SIZE, 0.0f, // bottom left
+	 -0.5f,  WALL_SIZE, 0.0f  // top left
 };
 
 unsigned int indices[] = {
@@ -36,7 +36,7 @@ unsigned int indices[] = {
 	1, 2, 3
 };
 
-float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
+float tempMaze1[MAZE_SIZE][MAZE_SIZE] = {
 	{0, 1, 1, 1, 0, 1, 1, 1, 0},
 	{1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -47,6 +47,30 @@ float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
 	{0, 0, 0, 0, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
+
+float tempMaze2[MAZE_SIZE][MAZE_SIZE] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+	{1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+};
+
+
 
 int main() {
 	printf("Initializing...");
@@ -107,32 +131,55 @@ int main() {
 		//Clear framebuffer
 		glClearColor(0.3f, 0.4f, 0.7f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		const float time = (float)glfwGetTime();
 
 		glBindVertexArray(VAO);
 		shader.use();
-		shader.setFloat("_Time", time); 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		// reading through tempMaze matrix
-		for (int i = 0; i < MAZE_SIZE; i++)
-		{
-			for (int j = 0; j < MAZE_SIZE; j++)
-			{
-				if (tempMaze[i][j] == 1)
-				{
-					// supply position of matrix element to vertex shader, accounting for diameter of each wall
-					shader.setFloat("posX", j * (WALL_SIZE * 2));
-					shader.setFloat("posY", -i * (WALL_SIZE * 2));
-					shader.setFloat("colFloat", colValues[i][j]);
 
-					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// reading through tempMaze matrix
+		for (int row = 0; row < MAZE_SIZE; row++) 
+		{
+			int col = 0;
+			while (col < MAZE_SIZE) 
+			{
+				// skipping over empty spaces
+				if (tempMaze2[row][col] == 0) 
+				{
+					col++;
+					continue;
 				}
+
+				// keep track of number of consecutive walls
+				int wallCount = 1;
+				while (col + wallCount < MAZE_SIZE && tempMaze2[row][col + wallCount] == 1) 
+				{
+					wallCount++;
+				}
+
+				// calculating final scale and position
+				float wallScale = WALL_SIZE * 2 * wallCount;  // scale according to WALL_SIZE and wallCount
+				float startX = col * (WALL_SIZE * 2);
+				float centerX = startX + (wallScale / 2);     // center of merged segment
+
+				// sending position and scale to shader
+				shader.setFloat("posX", centerX);
+				shader.setFloat("posY", -row * (WALL_SIZE * 2));
+				shader.setFloat("scaleX", wallScale);
+
+				shader.setFloat("colFloat", colValues[row][col]);
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+				col += wallCount;
 			}
 		}
 
 		glfwSwapBuffers(window);
 	}
 
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glfwTerminate();
 	printf("Shutting down...");
 }
 
