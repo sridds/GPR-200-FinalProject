@@ -10,6 +10,7 @@
 #include <ew/procGen.h>
 #include <ew/shader.h>
 #include <ew/texture.h>
+#include <ew/player.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -43,6 +44,9 @@ float orthoHeight = 10.0f;
 
 glm::vec3 lightPosition = glm::vec3(0);
 glm::vec3 lightColor = glm::vec3(1);
+
+Player player = Player(0.5f, 2.0f);
+
 struct Material {
 	float ambientK = 0.1f;
 	float diffuseK = 0.5f;
@@ -115,6 +119,8 @@ int main() {
 		lastFrame = currentFrame;
 		float time = (float)glfwGetTime();
 
+		player.update(deltaTime);
+		cameraPos = player.getTransform().position;
 		litShader.use();
 
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -196,17 +202,17 @@ void processInput(GLFWwindow* window)
 	glm::vec3 camUp = glm::normalize(glm::cross(camRight, cameraFront));
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraFront;
+		player.move(cameraFront);
+		//cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraFront;
+		player.move(-cameraFront);
+		//cameraPos -= cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= camRight * cameraSpeed;
+		player.move(-camRight);
+		//cameraPos -= camRight * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += camRight * cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		cameraPos -= camUp * cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		cameraPos += camUp * cameraSpeed;
+		player.move(camRight);
+		//cameraPos += camRight * cameraSpeed;
 }
 
 

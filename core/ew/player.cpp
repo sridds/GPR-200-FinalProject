@@ -9,13 +9,24 @@ const Transform& Player::getTransform()
 
 void Player::move(glm::vec3 amount)
 {
-	m_targetPosition = m_transform.position + amount;
+	if(m_isMoving) return;
+
+	m_targetPosition = m_transform.position + (amount * m_stepSize);
+	m_startPosition = m_transform.position;
 	elapsed = 0.0f;
+
+	m_isMoving = true;
 }
 
 void Player::update(float deltaTime) 
 {
-	glm::vec3 start = m_transform.position;
+	updatePos(deltaTime);
+	updateRot(deltaTime);
+}
+
+void Player::updatePos(float deltaTime)
+{
+	glm::vec3 start = m_startPosition;
 
 	if (elapsed < m_duration) {
 		elapsed += deltaTime;
@@ -28,5 +39,17 @@ void Player::update(float deltaTime)
 	}
 	else {
 		m_transform.position = m_targetPosition;
+		m_isMoving = false;
 	}
+}
+
+void Player::updateRot(float deltaTime)
+{
+
+}
+
+Player::Player(float duration, float stepSize)
+{
+	m_duration = duration;
+	m_stepSize = stepSize;
 }
