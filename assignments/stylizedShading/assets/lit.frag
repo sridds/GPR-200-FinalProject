@@ -27,15 +27,16 @@ uniform int _ToonLevels = 4;
 float _ToonScale = 1.0 / _ToonLevels;
 
 uniform float _RimLightFalloff = 4.0;
+uniform float _RimLightIntensity = 0.3; 
 
 vec3 CalculateLighting();
-float CalculateRimLighting(vec3 viewDir, vec3 norm);
+vec3 CalculateRimLighting(vec3 viewDir, vec3 norm);
 
 void main(){
     
     vec3 result = CalculateLighting();
 
-	FragColor = vec4(result,1.0);
+	FragColor = vec4(result, 1.0);
 }
 
 vec3 CalculateLighting()
@@ -88,14 +89,14 @@ vec3 CalculateLighting()
 
     if (_RimLightingEnabled)
     {
-        float rimFactor = CalculateRimLighting(viewDir, norm);
+        vec3 rimFactor = CalculateRimLighting(viewDir, norm);
         return (ambient + diffuseColor + specular + rimFactor) * texture(_MainTex,TexCoord).rgb;
     }
     
     return (ambient + diffuseColor + specular) * texture(_MainTex,TexCoord).rgb;
 }
 
-float CalculateRimLighting(vec3 viewDir, vec3 norm)
+vec3 CalculateRimLighting(vec3 viewDir, vec3 norm)
 {
     float rimFactor = dot(viewDir, norm);
 
@@ -103,5 +104,7 @@ float CalculateRimLighting(vec3 viewDir, vec3 norm)
     rimFactor = 1.0 - rimFactor;
     rimFactor = max(0.0, rimFactor);
     rimFactor = pow(rimFactor, _RimLightFalloff);
-    return rimFactor;
+
+    //Return the rimFactor multiplied by current light color and intensity
+    return rimFactor * _RimLightIntensity * _LightColor;
 }
