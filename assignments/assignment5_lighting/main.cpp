@@ -123,7 +123,7 @@ int main() {
 		cameraPos = player.getTransform().position;
 		litShader.use();
 
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + player.getFrontDir(), cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
 		litShader.setVec3("_ViewPos", cameraPos);
@@ -187,9 +187,9 @@ void processInput(GLFWwindow* window)
 	//Only allow camera input
 	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
 		//Release cursor
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		firstMouse = true;
-		return;
+		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		//firstMouse = true;
+		//return;
 	}
 	else {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -198,25 +198,27 @@ void processInput(GLFWwindow* window)
 	float cameraSpeed = 2.5f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		cameraSpeed *= 2.0f;
-	glm::vec3 camRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-	glm::vec3 camUp = glm::normalize(glm::cross(camRight, cameraFront));
+	glm::vec3 camRight = glm::normalize(glm::cross(player.getFrontDir(), cameraUp));
+	glm::vec3 camUp = glm::normalize(glm::cross(camRight, player.getFrontDir()));
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		player.move(cameraFront);
+		player.move(player.getFrontDir());
 		//cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		player.move(-cameraFront);
+		player.move(-player.getFrontDir());
 		//cameraPos -= cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		player.move(-camRight);
+		player.turnLeft();
 		//cameraPos -= camRight * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		player.move(camRight);
+		player.turnRight();
 		//cameraPos += camRight * cameraSpeed;
 }
 
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+
+	/*
 	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
 		return;
 
@@ -249,7 +251,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
-	cameraFront = glm::normalize(direction);
+	cameraFront = glm::normalize(direction);*/
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
