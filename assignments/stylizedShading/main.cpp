@@ -58,8 +58,9 @@ bool pointRender = false;
 bool isToonShading = true;
 int toonShadingLevels = 4;
 
-bool isRimLighting = false;
+bool isRimLighting = true;
 float rimLightFalloff = 8.0;
+float rimLightIntensity = 0.3;
 
 int main() {
 	printf("Initializing...");
@@ -155,6 +156,7 @@ int main() {
 		litShader.setInt("_ToonLevels", toonShadingLevels);
 		litShader.setInt("_RimLightingEnabled", isRimLighting);
 		litShader.setFloat("_RimLightFalloff", rimLightFalloff);
+		litShader.setFloat("_RimLightIntensity", rimLightIntensity);
 
 		//Draw plane
 		litShader.setMat4("_Model", planeTransform.getModelMatrix());
@@ -180,21 +182,29 @@ int main() {
 
 		//Create a window called Settings.
 		ImGui::Begin("Settings");
-		ImGui::DragFloat3("Light Position", &lightTransform.position.x, 0.1f);
-		ImGui::ColorEdit3("Light Color", &lightColor.r);
-		ImGui::SliderFloat("Ambient K", &material.ambientK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Diffuse K", &material.diffuseK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Specular K", &material.specularK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Shininess", &material.shininess, 2.0f, 1024);
-		if (ImGui::Checkbox("Wireframe", &wireFrame)) {
-			glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
+
+		if (ImGui::CollapsingHeader("Light Settings")) {
+			ImGui::DragFloat3("Light Position", &lightTransform.position.x, 0.1f);
+			ImGui::ColorEdit3("Light Color", &lightColor.r);
+			ImGui::SliderFloat("Ambient K", &material.ambientK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Diffuse K", &material.diffuseK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular K", &material.specularK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess", &material.shininess, 2.0f, 1024);
 		}
-		ImGui::Checkbox("Draw as Points", &pointRender);
+
+		if (ImGui::CollapsingHeader("Drawing Settings")) {
+			if (ImGui::Checkbox("Wireframe", &wireFrame)) {
+				glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
+			}
+			ImGui::Checkbox("Draw as Points", &pointRender);
+		}
+		
 		if (ImGui::CollapsingHeader("Toon Shading Settings")) {
 			ImGui::Checkbox("Enable Toon Shading", &isToonShading);
 			ImGui::SliderInt("Toon Levels", &toonShadingLevels, 2.0f, 64.0f);
 			ImGui::Checkbox("Enable Rim Lighting", &isRimLighting);
 			ImGui::SliderFloat("Rim Lighting Falloff", &rimLightFalloff, 0.0f, 64.0f);
+			ImGui::SliderFloat("Rim Light Intensity", &rimLightIntensity, 0.0f, 5.0f);
 		}
 		ImGui::End();
 

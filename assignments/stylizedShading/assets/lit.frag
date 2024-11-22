@@ -27,6 +27,7 @@ uniform int _ToonLevels = 4;
 float _ToonScale = 1.0 / _ToonLevels;
 
 uniform float _RimLightFalloff = 4.0;
+uniform float _RimLightIntensity = 0.3; 
 
 vec3 CalculateLighting();
 float CalculateRimLighting(vec3 viewDir, vec3 norm);
@@ -35,7 +36,7 @@ void main(){
     
     vec3 result = CalculateLighting();
 
-	FragColor = vec4(result,1.0);
+	FragColor = vec4(result, 1.0);
 }
 
 vec3 CalculateLighting()
@@ -103,5 +104,5 @@ float CalculateRimLighting(vec3 viewDir, vec3 norm)
     rimFactor = 1.0 - rimFactor;
     rimFactor = max(0.0, rimFactor);
     rimFactor = pow(rimFactor, _RimLightFalloff);
-    return rimFactor;
+    return rimFactor * _RimLightIntensity;
 }
