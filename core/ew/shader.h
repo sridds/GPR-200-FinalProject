@@ -18,6 +18,7 @@ namespace ew {
 		void setVec4(const char* name, float x, float y, float z, float w) const;
 		void setVec4(const char* name, const glm::vec4& v) const;
 		void setMat4(const char* name, const glm::mat4& m) const;
+		int getShaderID();
 	private:
 		unsigned int m_id; //Shader program handle
 	};
