@@ -62,6 +62,12 @@ bool isRimLighting = true;
 float rimLightFalloff = 8.0;
 float rimLightIntensity = 0.3;
 
+//Fog Settings
+float fogStart = 5.0;
+float fogEnd = 100.0;
+float fogExponential = 2.0;
+glm::vec3 fogColor = glm::vec3(1);
+
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -158,6 +164,12 @@ int main() {
 		litShader.setFloat("_RimLightFalloff", rimLightFalloff);
 		litShader.setFloat("_RimLightIntensity", rimLightIntensity);
 
+		//Fog settings
+		litShader.setFloat("_FogStart", fogStart);
+		litShader.setFloat("_FogEnd", fogEnd);
+		litShader.setFloat("_FogExponential", fogExponential);
+		litShader.setVec3("_FogColor", fogColor);
+
 		//Draw plane
 		litShader.setMat4("_Model", planeTransform.getModelMatrix());
 		planeMesh.draw(drawMode);
@@ -205,6 +217,13 @@ int main() {
 			ImGui::Checkbox("Enable Rim Lighting", &isRimLighting);
 			ImGui::SliderFloat("Rim Lighting Falloff", &rimLightFalloff, 0.0f, 64.0f);
 			ImGui::SliderFloat("Rim Light Intensity", &rimLightIntensity, 0.0f, 5.0f);
+		}
+
+		if (ImGui::CollapsingHeader("Fog Settings")) {
+			ImGui::InputFloat("Fog start", &fogStart);
+			ImGui::InputFloat("Fog end", &fogEnd);
+			ImGui::SliderFloat("Fog density", &fogExponential, 0.0f, 10.0f);
+			ImGui::ColorEdit3("Fog Color", &fogColor.r);
 		}
 		ImGui::End();
 
