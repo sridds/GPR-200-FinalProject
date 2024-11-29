@@ -1,5 +1,12 @@
 #include "transform.h"
 
+Transform::Transform() {
+	position = glm::vec3(1);
+	rotation = glm::vec3(1);
+	scale = glm::vec3(1);
+	rotationAngle = 0;
+}
+
 glm::mat4 Transform::getModelMatrix() {
 	//Create identity Matrix
 	glm::mat4 model = glm::mat4(1.0f);

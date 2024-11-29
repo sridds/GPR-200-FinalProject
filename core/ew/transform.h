@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 struct Transform {
+	Transform();
 	glm::vec3 position;
 	glm::vec3 rotation; //Euler angles
 	glm::vec3 scale;

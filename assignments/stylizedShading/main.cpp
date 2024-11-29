@@ -21,18 +21,94 @@
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
+#pragma region Maze Settings
+const int MAZE_SIZE = 19;
+const float WALL_SIZE = 1.0f;
+
+float vertices[] = {
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+};
+
+float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+	{1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+};
+
+// calculating center of maze for camera start pos
+float mazeCenterX = (MAZE_SIZE / 2.0f) * WALL_SIZE * 2.0f;
+float mazeCenterZ = -(MAZE_SIZE / 2.0f) * WALL_SIZE * 2.0f;
+#pragma endregion
+
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 //CAMERA
-glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(mazeCenterX, 1.0f, mazeCenterZ + WALL_SIZE);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float yaw = -90.0f, pitch = 0;
 float lastX = 400, lastY = 300;
 bool firstMouse = true;
 float fov = 60.0f;
+float lightHeightOffset = 3.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -41,7 +117,9 @@ float orthoHeight = 10.0f;
 Transform lightTransform;
 Transform planeTransform;
 Transform sphereTransform;
+Transform mazeTransform;
 
+#pragma region Lighting Settings
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
 	float ambientK = 0.1f;
@@ -58,7 +136,7 @@ bool pointRender = false;
 bool isToonShading = true;
 int toonShadingLevels = 4;
 
-bool isRimLighting = true;
+bool isRimLighting = false;
 float rimLightFalloff = 8.0;
 float rimLightIntensity = 0.3;
 
@@ -67,8 +145,10 @@ float fogStart = 5.0;
 float fogEnd = 100.0;
 float fogExponential = 2.0;
 glm::vec3 fogColor = glm::vec3(1);
+#pragma endregion
 
 int main() {
+	#pragma region Window Creation
 	printf("Initializing...");
 	if (!glfwInit()) {
 		printf("GLFW failed to init!");
@@ -84,6 +164,7 @@ int main() {
 		printf("GLAD Failed to load GL headers");
 		return 1;
 	}
+	#pragma endregion
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -109,23 +190,34 @@ int main() {
 	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader unlitShader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
 	unsigned int brickTex = ew::loadTexture("assets/brick.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
+	
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glBindTexture(GL_TEXTURE_2D, brickTex);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 	glPointSize(4.0);
-
-	//Set default light transform
-	lightTransform.position = glm::vec3(0.0f, 1.5f, 0.0f);
-	lightTransform.rotation = glm::vec3(1);
-	lightTransform.scale = glm::vec3(1);
 
 	//Set Plane transform
 	planeTransform.rotation = glm::vec3(1.0f, 0.0f, 0.0f);
 	planeTransform.rotationAngle = -90.0f;
 	planeTransform.position = glm::vec3(0.0f);
 	planeTransform.scale = glm::vec3(3.0f, 3.0f, 1.0f);
+
+	unsigned int VBO, VAO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTex);
+
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -139,12 +231,27 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//Set light to follow player
+		lightTransform.position.x = cameraPos.x;
+		lightTransform.position.y = cameraPos.y + lightHeightOffset;
+		lightTransform.position.z = cameraPos.z;
+
+		//Light rotation
+		lightTransform.rotation = glm::vec3(1.0, 0.0, 1.0);
+		lightTransform.rotationAngle = glfwGetTime() * 20.0f;
+
 		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
-		//rimLightFalloff = glm::clamp((abs(cos(currentFrame) * 8.0f)), 6.0f, 8.0f);
+		#pragma region Shader Programs
+		//Draw light source as cube
+		unlitShader.use();
+		unlitShader.setMat4("_ViewProjection", projMatrix * view);
+		unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
+		unlitShader.setVec3("_Color", lightColor);
+		cubeMesh.draw(drawMode);
 
 		litShader.use();
 		litShader.setVec3("_ViewPos", cameraPos);
@@ -179,14 +286,52 @@ int main() {
 		sphereTransform.scale = glm::vec3(1.0f);
 		litShader.setMat4("_Model", sphereTransform.getModelMatrix());
 		sphereMesh.draw(drawMode);
+		#pragma endregion
 
-		//Draw light source as cube
-		unlitShader.use();
-		unlitShader.setMat4("_ViewProjection", projMatrix * view);
-		unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
-		unlitShader.setVec3("_Color", lightColor);
-		cubeMesh.draw(drawMode);
+		glBindVertexArray(VAO);
 
+		#pragma region Draw Maze
+		// reading through tempMaze matrix
+		for (int row = 0; row < MAZE_SIZE; row++)
+		{
+			int col = 0;
+			while (col < MAZE_SIZE)
+			{
+				// if it is an empty space in the maze, we dont draw a square
+				if (tempMaze[row][col] == 0)
+				{
+					col++;
+					continue;
+				}
+
+				int wallCount = 1;
+				// tracking wall count and ensuring we dont somehow exceed the size of the maze
+				while (col + wallCount < MAZE_SIZE && tempMaze[row][col + wallCount] == 1)
+				{
+					wallCount++;
+				}
+
+				// adjust scaling and positioning
+				float centerX = (col + wallCount / 2.0f) * WALL_SIZE * 2.0f;
+				float centerY = -row * WALL_SIZE * 2.0f;
+				float centerZ = 1.0f;
+
+				// create model matrix
+				glm::mat4 model = glm::mat4(1.0f);
+				// rotating around x axis to lay maze flat
+				model = glm::translate(model, glm::vec3(centerX, 1.0f, centerY));
+				model = glm::scale(model, glm::vec3(wallCount, 1.0f, 1.0f) * WALL_SIZE * 2.0f);
+
+				litShader.setMat4("_Model", model);
+
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+
+				col += wallCount;
+			}
+		}
+		#pragma endregion
+
+		#pragma region ImGui
 		//Start drawing ImGUI
 		ImGui_ImplGlfw_NewFrame();
 		ImGui_ImplOpenGL3_NewFrame();
@@ -210,7 +355,7 @@ int main() {
 			}
 			ImGui::Checkbox("Draw as Points", &pointRender);
 		}
-		
+
 		if (ImGui::CollapsingHeader("Toon Shading Settings")) {
 			ImGui::Checkbox("Enable Toon Shading", &isToonShading);
 			ImGui::SliderInt("Toon Levels", &toonShadingLevels, 2.0f, 64.0f);
@@ -230,10 +375,16 @@ int main() {
 		//Actually render IMGUI elements using OpenGL
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		#pragma endregion
 
 		glfwSwapBuffers(window);
 	}
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glfwTerminate();
 	printf("Shutting down...");
+
+	return 0;
 }
 
 void processInput(GLFWwindow* window)
@@ -249,7 +400,7 @@ void processInput(GLFWwindow* window)
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 	
-	float cameraSpeed = 2.5f * deltaTime;
+	float cameraSpeed = 5.0f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		cameraSpeed *= 2.0f;
 	glm::vec3 camRight = glm::normalize(glm::cross(cameraFront, cameraUp));
