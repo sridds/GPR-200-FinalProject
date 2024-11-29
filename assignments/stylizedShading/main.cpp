@@ -106,7 +106,7 @@ int main() {
 	ew::Mesh planeMesh = ew::Mesh(planeMeshData);
 	ew::Mesh sphereMesh = ew::Mesh(sphereMeshData);
 
-	ew::Shader litShader = ew::Shader("assets/ToonShader.vert", "assets/ToonShader.frag");
+	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader unlitShader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
 	unsigned int brickTex = ew::loadTexture("assets/brick.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
 	glEnable(GL_DEPTH_TEST);
@@ -143,6 +143,8 @@ int main() {
 
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
+
+		//rimLightFalloff = glm::clamp((abs(cos(currentFrame) * 8.0f)), 6.0f, 8.0f);
 
 		litShader.use();
 		litShader.setVec3("_ViewPos", cameraPos);

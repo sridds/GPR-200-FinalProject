@@ -41,12 +41,12 @@ uniform float _FogExponential = 2.0;
 
 void main(){
     
-    //Lighting
     vec3 result = CalculateLighting();
 
-    //Fog
-    float fogFactor = CalculateFogFactor();
-    result = mix(_FogColor, result, pow(fogFactor, _FogExponential));
+    if (_FogColor != vec3(0)){
+        float fogFactor = CalculateFogFactor();
+        result = mix(_FogColor, result, pow(fogFactor, _FogExponential));
+    }
 
 	FragColor = vec4(result, 1.0);
 }
