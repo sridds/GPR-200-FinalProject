@@ -12,6 +12,12 @@
 #include <ew/procGen.h>
 #include <ew/shader.h>
 #include <ew/texture.h>
+#include <ew/transform.h>
+
+//Include IMGUI
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
@@ -105,6 +111,36 @@ float fov = 60.0f;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f; // time of last frame
 
+Transform lightTransform;
+
+
+
+glm::vec3 lightColor = glm::vec3(1);
+struct Material {
+	float ambientK = 0.1f;
+	float diffuseK = 0.5f;
+	float specularK = 0.5f;
+	float shininess = 64.0f;
+	bool blinnPhong = true;
+} material;
+
+bool wireFrame = false;
+bool pointRender = false;
+
+//Toon shading Settings
+bool isToonShading = true;
+int toonShadingLevels = 4;
+
+bool isRimLighting = true;
+float rimLightFalloff = 8.0;
+float rimLightIntensity = 0.3;
+
+//Fog Settings
+float fogStart = 5.0;
+float fogEnd = 100.0;
+float fogExponential = 2.0;
+glm::vec3 fogColor = glm::vec3(1);
+
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -125,6 +161,11 @@ int main() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	//Initialize ImGUI
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
 	
 	ew::Shader shader = ew::Shader("assets/maze.vert", "assets/maze.frag");
 	
@@ -160,6 +201,15 @@ int main() {
 		}
 	}
 
+	//Create Toon shader program
+	ew::Shader toonShader = ew::Shader("assets/ToonShader.vert", "assets/ToonShader.frag");
+	ew::Shader unlitShader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
+
+	//Set default light transform
+	lightTransform.position = glm::vec3(0.0f, 1.5f, 0.0f);
+	lightTransform.rotation = glm::vec3(1);
+	lightTransform.scale = glm::vec3(1);
+
 	// render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -176,14 +226,45 @@ int main() {
 		float time = (float)glfwGetTime();
 
 		glBindVertexArray(VAO);
-		shader.use();
+		//shader.use();
 
 		// create transformations
 		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
-		shader.setMat4("view", view);
-		shader.setMat4("projection", projection);
+		//shader.setMat4("view", view);
+		//shader.setMat4("projection", projection);
+
+		#pragma region Toon Shader
+		toonShader.use();
+		toonShader.setVec3("_ViewPos", cameraPos);
+		toonShader.setMat4("_ViewProjection", projection * view);
+		toonShader.setVec3("_LightColor", lightColor);
+		toonShader.setVec3("_LightPos", lightTransform.position);
+		toonShader.setFloat("_Material.ambientK", material.ambientK);
+		toonShader.setFloat("_Material.diffuseK", material.diffuseK);
+		toonShader.setFloat("_Material.specularK", material.specularK);
+		toonShader.setFloat("_Material.shininess", material.shininess);
+		toonShader.setInt("_Material.blinnPhong", material.blinnPhong);
+
+		//Set Toon settings
+		toonShader.setInt("_ToonShadingEnabled", isToonShading);
+		toonShader.setInt("_ToonLevels", toonShadingLevels);
+		toonShader.setInt("_RimLightingEnabled", isRimLighting);
+		toonShader.setFloat("_RimLightFalloff", rimLightFalloff);
+		toonShader.setFloat("_RimLightIntensity", rimLightIntensity);
+
+		//Fog settings
+		toonShader.setFloat("_FogStart", fogStart);
+		toonShader.setFloat("_FogEnd", fogEnd);
+		toonShader.setFloat("_FogExponential", fogExponential);
+		toonShader.setVec3("_FogColor", fogColor);
+		#pragma endregion
+
+		//unlitShader.use();
+		//unlitShader.setMat4("_ViewProjection", projection * view);
+		//unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
+		//unlitShader.setVec3("_Color", lightColor);
 
 		// reading through tempMaze matrix
 		for (int row = 0; row < MAZE_SIZE; row++)
@@ -216,14 +297,52 @@ int main() {
 				model = glm::translate(model, glm::vec3(centerX, 1.0f, centerY));
 				model = glm::scale(model, glm::vec3(wallCount, 1.0f, 1.0f) * WALL_SIZE * 2.0f);
 
-				shader.setMat4("model", model);
-				shader.setFloat("colFloat", colValues[row][col]);
+				toonShader.setMat4("_Model", model);
+				//toonShader.setFloat("colFloat", colValues[row][col]);
 
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 
 				col += wallCount;
 			}
 		}
+
+		//Start drawing ImGUI
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		//Create a window called Settings.
+		ImGui::Begin("Settings");
+
+		if (ImGui::CollapsingHeader("Light Settings")) {
+			ImGui::DragFloat3("Light Position", &lightTransform.position.x, 0.1f);
+			ImGui::ColorEdit3("Light Color", &lightColor.r);
+			ImGui::SliderFloat("Ambient K", &material.ambientK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Diffuse K", &material.diffuseK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular K", &material.specularK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess", &material.shininess, 2.0f, 1024);
+		}
+
+		if (ImGui::CollapsingHeader("Toon Shading Settings")) {
+			ImGui::Checkbox("Enable Toon Shading", &isToonShading);
+			ImGui::SliderInt("Toon Levels", &toonShadingLevels, 2.0f, 64.0f);
+			ImGui::Checkbox("Enable Rim Lighting", &isRimLighting);
+			ImGui::SliderFloat("Rim Lighting Falloff", &rimLightFalloff, 0.0f, 64.0f);
+			ImGui::SliderFloat("Rim Light Intensity", &rimLightIntensity, 0.0f, 5.0f);
+		}
+
+		if (ImGui::CollapsingHeader("Fog Settings")) {
+			ImGui::InputFloat("Fog start", &fogStart);
+			ImGui::InputFloat("Fog end", &fogEnd);
+			ImGui::SliderFloat("Fog density", &fogExponential, 0.0f, 10.0f);
+			ImGui::ColorEdit3("Fog Color", &fogColor.r);
+		}
+		ImGui::End();
+
+		//Actually render IMGUI elements using OpenGL
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 
 		glfwSwapBuffers(window);
 	}
