@@ -13,7 +13,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-//Include IMGUI
+// Include IMGUI
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -24,50 +24,6 @@ const int SCREEN_HEIGHT = 720;
 #pragma region Maze Settings
 const int MAZE_SIZE = 19;
 const float WALL_SIZE = 1.0f;
-
-float vertices[] = {
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
-
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f,
-
-	-0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-};
 
 float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -189,7 +145,9 @@ int main() {
 
 	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader unlitShader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
+
 	unsigned int brickTex = ew::loadTexture("assets/brick.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
+	unsigned int wallTex = ew::loadTexture("assets/undergroundBlock.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
 	
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -203,22 +161,10 @@ int main() {
 	planeTransform.position = glm::vec3(0.0f);
 	planeTransform.scale = glm::vec3(3.0f, 3.0f, 1.0f);
 
-	unsigned int VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
 
-	glBindVertexArray(VAO);
+	glBindTexture(GL_TEXTURE_2D, wallTex);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindTexture(GL_TEXTURE_2D, brickTex);
-
-	//Render loop
+	// Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		processInput(window);
@@ -227,16 +173,16 @@ int main() {
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		//Clear framebuffer
+		// Clear framebuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//Set light to follow player
+		// Set light to follow player
 		lightTransform.position.x = cameraPos.x;
 		lightTransform.position.y = cameraPos.y + lightHeightOffset;
 		lightTransform.position.z = cameraPos.z;
 
-		//Light rotation
+		// Light rotation
 		lightTransform.rotation = glm::vec3(1.0, 0.0, 1.0);
 		lightTransform.rotationAngle = glfwGetTime() * 20.0f;
 
@@ -288,7 +234,6 @@ int main() {
 		sphereMesh.draw(drawMode);
 		#pragma endregion
 
-		glBindVertexArray(VAO);
 
 		#pragma region Draw Maze
 		// reading through tempMaze matrix
@@ -324,7 +269,8 @@ int main() {
 
 				litShader.setMat4("_Model", model);
 
-				glDrawArrays(GL_TRIANGLES, 0, 36);
+				// using winebrenner mesh draws
+				cubeMesh.draw(drawMode);
 
 				col += wallCount;
 			}
@@ -379,14 +325,14 @@ int main() {
 
 		glfwSwapBuffers(window);
 	}
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+
 	glfwTerminate();
 	printf("Shutting down...");
 
 	return 0;
 }
 
+#pragma region Input Functions
 void processInput(GLFWwindow* window)
 {
 	//Only allow camera input
@@ -465,3 +411,4 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	if (fov > 90.0f)
 		fov = 90.0f;
 }
+#pragma endregion
