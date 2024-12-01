@@ -9,12 +9,40 @@ out vec3 WorldPos;
 
 uniform mat4 _Model;
 uniform mat4 _ViewProjection;
+uniform int _WallCount;
+uniform int _MazeSize;
+uniform int _ActiveTexture;
 
 void main(){
     vec4 worldPos = _Model * vec4(aPos,1.0);
 	WorldPos = worldPos.xyz;
 	WorldNormal = mat3(transpose(inverse(_Model))) * aNormal;
 
-	TexCoord = aUV;
+	// floor plane specifc
+	if (_ActiveTexture == 1)
+	{
+		TexCoord = vec2(aUV.x * _MazeSize, aUV.y * _MazeSize);
+	}
+	// if this is the left or right wall, we dont want to modify its uv
+	else if (aNormal.x != 0)
+	{
+		TexCoord = vec2(aUV.x, aUV.y);
+	}
+	// if its the top face, we need to modify the v axis
+	else if (aNormal.y != 0)
+	{
+		TexCoord = vec2(aUV.x, aUV.y * _WallCount);
+	}
+	// if its the front or back face, we need to modify the u axis
+	else if (aNormal.z != 0)
+	{
+		TexCoord = vec2(aUV.x * _WallCount, aUV.y);
+	}
+	else
+	{
+		TexCoord = vec2(aUV.x, aUV.y);
+	}
+
 	gl_Position =_ViewProjection * worldPos;
 }
+

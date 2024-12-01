@@ -17,6 +17,7 @@ namespace ew {
 		unsigned int startVertex = mesh->vertices.size();
 		glm::vec3 a = glm::vec3(normal.z, normal.x, normal.y); //U axis
 		glm::vec3 b = glm::cross(normal, a); //V axis
+
 		for (int i = 0; i < 4; i++)
 		{
 			int col = i % 2;
@@ -48,7 +49,8 @@ namespace ew {
 		createCubeFace(glm::vec3{ +1.0f,+0.0f,+0.0f }, size, mesh); //Right
 		createCubeFace(glm::vec3{ +0.0f,+1.0f,+0.0f }, size, mesh); //Top
 		createCubeFace(glm::vec3{ -1.0f,+0.0f,+0.0f }, size, mesh); //Left
-		createCubeFace(glm::vec3{ +0.0f,-1.0f,+0.0f }, size, mesh); //Bottom
+		// we dont want to render the bottom face because it is not seen
+		//createCubeFace(glm::vec3{ +0.0f,-1.0f,+0.0f }, size, mesh); //Bottom
 		createCubeFace(glm::vec3{ +0.0f,+0.0f,-1.0f }, size, mesh); //Back
 		return;
 	}

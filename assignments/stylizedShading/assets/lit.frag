@@ -5,7 +5,10 @@ in vec3 WorldNormal;
 in vec3 WorldPos;
 
 in vec2 TexCoord;
-uniform sampler2D _MainTex;
+
+// textures[0] is the wall and textures[1] is the floor
+uniform sampler2D textures[2];
+uniform int _ActiveTexture;
 
 uniform vec3 _LightColor = vec3(1);
 uniform vec3 _LightPos = vec3(0);
@@ -39,8 +42,9 @@ uniform float _FogEnd = 100.0;
 uniform vec3 _FogColor = vec3(1);
 uniform float _FogExponential = 2.0;
 
-void main(){
-    
+void main() {
+    // deciding which sampler2d to use
+
     vec3 result = CalculateLighting();
 
     if (_FogColor != vec3(0)){
@@ -110,10 +114,10 @@ vec3 CalculateLighting()
     if (_RimLightingEnabled)
     {
         vec3 rimFactor = CalculateRimLighting(viewDir, norm);
-        return (ambient + diffuseColor + specular + rimFactor) * texture(_MainTex,TexCoord).rgb;
+        return (ambient + diffuseColor + specular + rimFactor) * texture(textures[_ActiveTexture],TexCoord).rgb;
     }
     
-    return (ambient + diffuseColor + specular) * texture(_MainTex,TexCoord).rgb;
+    return (ambient + diffuseColor + specular) * texture(textures[_ActiveTexture],TexCoord).rgb;
 }
 
 vec3 CalculateRimLighting(vec3 viewDir, vec3 norm)
