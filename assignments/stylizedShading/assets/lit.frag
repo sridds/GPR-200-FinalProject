@@ -24,7 +24,7 @@ uniform Material _Material;
 
 //Toon Shading
 uniform bool _ToonShadingEnabled;
-uniform bool _RimLightingEnabled = true;
+uniform bool _RimLightingEnabled;
 
 uniform int _ToonLevels = 4;
 float _ToonScale = 1.0 / _ToonLevels;
@@ -34,7 +34,15 @@ uniform float _RimLightIntensity = 0.3;
 
 vec3 CalculateLighting();
 vec3 CalculateRimLighting(vec3 viewDir, vec3 norm);
-float CalculateFogFactor();
+
+//Pixelation
+uniform bool _PixelationEnabled = true;
+uniform float _WidthPixelation = 64;
+uniform float _HeightPixelation = 64;
+uniform float _ColorPrecision = 2;
+vec3 color;
+
+vec3 CalculatePixelation();
 
 //Fog 
 uniform float _FogStart = 5.0;
@@ -42,17 +50,38 @@ uniform float _FogEnd = 100.0;
 uniform vec3 _FogColor = vec3(1);
 uniform float _FogExponential = 2.0;
 
+float CalculateFogFactor();
+
 void main() {
     // deciding which sampler2d to use
-
     vec3 result = CalculateLighting();
-
+    
+    //Fog
     if (_FogColor != vec3(0)){
         float fogFactor = CalculateFogFactor();
         result = mix(_FogColor, result, pow(fogFactor, _FogExponential));
     }
 
+    //Pixelation
+    if (_PixelationEnabled){
+        result *= CalculatePixelation();
+    }
+    else{
+        result = result * texture(textures[_ActiveTexture],TexCoord).rgb;
+    }
+
 	FragColor = vec4(result, 1.0);
+}
+
+//Returns a scaled texture UV and color value
+vec3 CalculatePixelation(){
+    vec2 uv = TexCoord;
+    uv.x = floor(uv.x * _WidthPixelation) / _WidthPixelation;
+    uv.y = floor(uv.y * _HeightPixelation) / _HeightPixelation;
+    color = texture(textures[_ActiveTexture], uv).rgb;
+    color = floor(color * _ColorPrecision) / _ColorPrecision;
+
+    return color;
 }
 
 float CalculateFogFactor(){
@@ -114,10 +143,10 @@ vec3 CalculateLighting()
     if (_RimLightingEnabled)
     {
         vec3 rimFactor = CalculateRimLighting(viewDir, norm);
-        return (ambient + diffuseColor + specular + rimFactor) * texture(textures[_ActiveTexture],TexCoord).rgb;
+        return (ambient + diffuseColor + specular + rimFactor);
     }
     
-    return (ambient + diffuseColor + specular) * texture(textures[_ActiveTexture],TexCoord).rgb;
+    return (ambient + diffuseColor + specular);
 }
 
 vec3 CalculateRimLighting(vec3 viewDir, vec3 norm)
