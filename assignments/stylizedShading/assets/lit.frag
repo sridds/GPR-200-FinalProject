@@ -113,7 +113,8 @@ float CalculateDitherCoordinate(vec3 pixelColor){
 
     float brightness = PixelBrightness(pixelColor);
     float ditherPixel = GetDitherValue(TexCoord, brightness, ditherPaterns);
-    return pixelColor * ditherPixel;
+    //return pixelColor * ditherPixel;
+    return 0;
 }
 
 //Returns a scaled texture UV and color value

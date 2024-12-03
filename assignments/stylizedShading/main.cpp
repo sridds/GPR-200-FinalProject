@@ -21,8 +21,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-const int SCREEN_WIDTH = 2000;
-const int SCREEN_HEIGHT = 1500;
+const int SCREEN_WIDTH = 1500;
+const int SCREEN_HEIGHT = 1000;
 
 #pragma region Maze Settings
 const int MAZE_SIZE = 19;
@@ -95,7 +95,7 @@ float yaw = -90.0f, pitch = 0;
 float lastX = 400, lastY = 300;
 bool firstMouse = true;
 float fov = 60.0f;
-float lightHeightOffset = 3.0f;
+float lightHeightOffset = 0.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -181,7 +181,6 @@ int main() {
 
 	// shaders and textures
 	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
-	ew::Shader unlitShader = ew::Shader("assets/unlit.vert", "assets/unlit.frag");
 
 	unsigned int wallTex = ew::loadTexture("assets/undergroundBlock.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
 	unsigned int floorTex = ew::loadTexture("assets/abovegroundFloor.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
@@ -241,12 +240,6 @@ int main() {
 
 		#pragma region Shader Programs
 		//Draw light source as cube
-		unlitShader.use();
-		unlitShader.setMat4("_ViewProjection", projMatrix * view);
-		unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
-		unlitShader.setVec3("_Color", lightColor);
-		cubeMesh.draw(drawMode);
-
 		litShader.use();
 		litShader.setVec3("_ViewPos", cameraPos);
 		litShader.setMat4("_ViewProjection", projMatrix * view);
