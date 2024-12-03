@@ -45,6 +45,7 @@ vec3 color;
 vec3 CalculatePixelation();
 
 //Fog 
+uniform bool _FogEnabled;
 uniform float _FogStart = 5.0;
 uniform float _FogEnd = 100.0;
 uniform vec3 _FogColor = vec3(1);
@@ -67,14 +68,12 @@ float PixelBrightness(vec3 pixelColor);
 vec4 GetTexelSize(float width, float height);
 float GetDitherValue(vec2 uv, float brightness, mat4x4 pattern);
 
-
-
 void main() {
     // deciding which sampler2d to use
     vec3 result = CalculateLighting();
     
     //Fog
-    if (_FogColor != vec3(0)){
+    if (_FogEnabled){
         float fogFactor = CalculateFogFactor();
         result = mix(_FogColor, result, pow(fogFactor, _FogExponential));
     }
