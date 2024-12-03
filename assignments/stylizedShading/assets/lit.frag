@@ -52,6 +52,23 @@ uniform float _FogExponential = 2.0;
 
 float CalculateFogFactor();
 
+//Dithering
+uniform int _DitherPattern;
+uniform float _DitherThreshold = 0.5;
+uniform float _DitherStrength = 1;
+uniform float _DitherScale = 1;
+
+mat4x4 ditherPaterns = mat4x4(0, 1, 0, 1,
+                              1, 0, 1, 0,
+                              0, 1, 0, 1,
+                              1, 0, 1, 0);
+
+float PixelBrightness(vec3 pixelColor);
+vec4 GetTexelSize(float width, float height);
+float GetDitherValue(vec2 uv, float brightness, mat4x4 pattern);
+
+
+
 void main() {
     // deciding which sampler2d to use
     vec3 result = CalculateLighting();
@@ -71,6 +88,32 @@ void main() {
     }
 
 	FragColor = vec4(result, 1.0);
+}
+
+//Returns the average color of a pixel
+float PixelBrightness(vec3 pixelColor){
+    return pixelColor.r + pixelColor.g + pixelColor.b / 3.0;
+}
+
+vec4 GetTexelSize(float width, float height){
+    return vec4(1 / width, 1 / height, width, height);
+}
+
+float GetDitherValue(vec2 uv, float brightness, mat4x4 pattern){
+    int x = int(mod(uv.x, 4.0));
+    int y = int(mod(uv.y, 4.0));
+
+    return brightness * _DitherThreshold < ditherPaterns[x][y] ? 0 : 1;
+}
+
+float CalculateDitherCoordinate(vec3 pixelColor){
+    vec4 texelSize = GetTexelSize(1, 1);
+    vec2 ditherCoordinate = texelSize.xy;
+    ditherCoordinate /= _DitherScale;
+
+    float brightness = PixelBrightness(pixelColor);
+    float ditherPixel = GetDitherValue(TexCoord, brightness, ditherPaterns);
+    return pixelColor * ditherPixel;
 }
 
 //Returns a scaled texture UV and color value
