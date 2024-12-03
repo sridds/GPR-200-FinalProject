@@ -26,12 +26,35 @@ const int SCREEN_HEIGHT = 1500;
 
 #pragma region Maze Settings
 const int MAZE_SIZE = 19;
-const float WALL_SIZE = 1.0f;
+float WALL_SIZE = 1.0f;
+float WALL_HEIGHT = 1.0f;
 
 float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+	{1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+};
+
+float presetMaze1[MAZE_SIZE][MAZE_SIZE] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
 	{1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
 	{1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1},
 	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
@@ -118,7 +141,7 @@ int main() {
 		printf("GLFW failed to init!");
 		return 1;
 	}
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hello Triangle", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Maze Generation", NULL, NULL);
 	if (window == NULL) {
 		printf("GLFW failed to create window");
 		return 1;
@@ -258,12 +281,14 @@ int main() {
 		litShader.setInt("_ActiveTexture", 0);
 
 		// draw sphere
-		sphereTransform.position = glm::vec3(5.0f, 3.0f, 1.0f);
-		sphereTransform.scale = glm::vec3(1.0f);
+		sphereTransform.position = glm::vec3(0.0f, 8.0f, 0.0f);
+		sphereTransform.scale = glm::vec3(0.75f);
 		litShader.setMat4("_Model", sphereTransform.getModelMatrix());
 		sphereMesh.draw(drawMode);
 		#pragma endregion
 
+		// if wall size is changed, scale the plane with it
+		planeTransform.scale = glm::vec3(3.0f * WALL_SIZE, 3.0f * WALL_SIZE, 1.0f);
 
 		#pragma region Draw Maze
 		// reading through tempMaze matrix
@@ -288,14 +313,12 @@ int main() {
 
 				// adjust scaling and positioning
 				float centerX = (col + wallCount / 2.0f) * WALL_SIZE * 2.0f;
-				float centerY = -row * WALL_SIZE * 2.0f;
-				float centerZ = 1.0f;
+				float centerZ = -row * WALL_SIZE * 2.0f;
 
 				// create model matrix
 				glm::mat4 model = glm::mat4(1.0f);
-				// rotating around x axis to lay maze flat
-				model = glm::translate(model, glm::vec3(centerX, 1.0f, centerY));
-				model = glm::scale(model, glm::vec3(wallCount, 1.0f, 1.0f) * WALL_SIZE * 2.0f);
+				model = glm::translate(model, glm::vec3(centerX, WALL_SIZE * WALL_HEIGHT, centerZ + (1 - WALL_SIZE)));
+				model = glm::scale(model, glm::vec3(wallCount, WALL_HEIGHT, 1.0f) * WALL_SIZE * 2.0f);
 
 				litShader.setMat4("_Model", model);
 				litShader.setInt("_WallCount", wallCount);
@@ -346,6 +369,11 @@ int main() {
 			ImGui::InputFloat("Fog end", &fogEnd);
 			ImGui::SliderFloat("Fog density", &fogExponential, 0.0f, 10.0f);
 			ImGui::ColorEdit3("Fog Color", &fogColor.r);
+		}
+
+		if (ImGui::CollapsingHeader("Maze Settings")) {
+			ImGui::SliderFloat("Wall Size", &WALL_SIZE, 0.05f, 5.0f);
+			ImGui::SliderFloat("Wall Height", &WALL_HEIGHT, 0.2f, 3.5f);
 		}
 		ImGui::End();
 
