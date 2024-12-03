@@ -6,6 +6,7 @@ layout(location = 2) in vec2 aUV;
 out vec3 WorldNormal;
 out vec2 TexCoord;
 out vec3 WorldPos;
+out vec4 ClipSpace;
 
 uniform mat4 _Model;
 uniform mat4 _ViewProjection;
@@ -43,6 +44,8 @@ void main(){
 		TexCoord = vec2(aUV.x, aUV.y);
 	}
 
-	gl_Position =_ViewProjection * worldPos;
+	ClipSpace = _ViewProjection * worldPos;
+
+	gl_Position = ClipSpace;
 }
 

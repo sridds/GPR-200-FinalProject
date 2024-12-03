@@ -375,7 +375,7 @@ int main() {
 				ImGui::Checkbox("Enabled Pixelation", &isPixelationEnabled);
 				ImGui::InputFloat("Pixelation Width", &widthPixelation);
 				ImGui::InputFloat("Pixelation Height", &heightPixelation);
-				ImGui::SliderFloat("Color Precision", &colorPrecision, 1, 256);
+				ImGui::InputFloat("Color Precision", &colorPrecision, 1, 256);
 			}
 		}
 

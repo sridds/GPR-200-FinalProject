@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 in vec3 WorldNormal;
 in vec3 WorldPos;
+in vec4 ClipSpace;
 
 in vec2 TexCoord;
 
@@ -67,6 +68,7 @@ mat4x4 ditherPaterns = mat4x4(0, 1, 0, 1,
 float PixelBrightness(vec3 pixelColor);
 vec4 GetTexelSize(float width, float height);
 float GetDitherValue(vec2 uv, float brightness, mat4x4 pattern);
+float CalculateDitherCoordinate(vec3 pixelColor);
 
 void main() {
     // deciding which sampler2d to use
@@ -85,6 +87,8 @@ void main() {
     else{
         result = result * texture(textures[_ActiveTexture],TexCoord).rgb;
     }
+
+    //result *= CalculateDitherCoordinate(result);
 
 	FragColor = vec4(result, 1.0);
 }
@@ -107,7 +111,9 @@ float GetDitherValue(vec2 uv, float brightness, mat4x4 pattern){
 
 float CalculateDitherCoordinate(vec3 pixelColor){
     vec4 texelSize = GetTexelSize(1, 1);
-    vec2 ditherCoordinate = texelSize.xy;
+    //Need view space 
+    vec2 screenCoordinate = ClipSpace.xy / ClipSpace.w;
+    vec2 ditherCoordinate = screenCoordinate * texelSize.xy;
     ditherCoordinate /= _DitherScale;
 
     float brightness = PixelBrightness(pixelColor);
