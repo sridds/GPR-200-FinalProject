@@ -24,7 +24,7 @@ void Player::turnLeft()
 	if(m_isMoving || m_isTurning) return;
 
 	// cos(yaw) * cos(pitch)
-	m_startYaw = cos(m_front.x) * cos(m_front.y);
+	m_startYaw = m_curYaw;
 	m_targetYaw = m_curYaw - 90.0f;
 	rotationElapsed = 0.0f;
 
@@ -35,7 +35,7 @@ void Player::turnRight()
 {
 	if(m_isMoving || m_isTurning) return;
 
-	m_startYaw = cos(m_front.x) * cos(m_front.y);
+	m_startYaw = m_curYaw;
 	m_targetYaw = m_curYaw + 90.0f;
 	rotationElapsed = 0.0f;
 
@@ -67,17 +67,13 @@ void Player::updatePos(float deltaTime)
 
 void Player::updateRot(float deltaTime)
 {
-	glm::vec3 m_dir;
-	m_dir.x = cos(glm::radians(m_curYaw)) * cos(glm::radians(m_curYaw));
-
-	if(m_isTurning) m_front = glm::normalize(m_dir);
-
 	if (rotationElapsed < m_duration) {
 		rotationElapsed += deltaTime;
 		float t = rotationElapsed / m_duration;
 
 		// ease out quart function https://easings.net/#easeOutQuart
 		m_curYaw = glm::mix(m_startYaw, m_targetYaw, 1 - pow(1 - t, 4));
+		m_transform.rotationAngle = m_curYaw;
 
 		return;
 	}
@@ -89,11 +85,26 @@ void Player::updateRot(float deltaTime)
 
 Player::Player(float duration, float stepSize)
 {
+	m_transform.rotation = glm::vec3(0, 1, 0);
+	m_transform.rotationAngle = 0.0f;
+
 	m_duration = duration;
 	m_stepSize = stepSize;
 }
 
 glm::vec3 Player::getFrontDir()
 {
+	glm::vec3 m_dir;
+	m_dir.x = cos(glm::radians(m_curYaw)) * cos(glm::radians(m_curYaw));
+
+	m_front = glm::normalize(m_dir);
+
+	/*
+		glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+	cameraFront = glm::normalize(direction);*/
 	return m_front;
 }

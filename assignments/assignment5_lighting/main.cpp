@@ -123,7 +123,21 @@ int main() {
 		cameraPos = player.getTransform().position;
 		litShader.use();
 
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + player.getFrontDir(), cameraUp);
+		glm::vec3 direction;
+		direction.x = cos(glm::radians(player.getTransform().rotationAngle)) * cos(glm::radians(0.0f));
+		direction.y = sin(glm::radians(0.0f));
+		direction.z = sin(glm::radians(player.getTransform().rotationAngle)) * cos(glm::radians(0.0f));
+		cameraFront = glm::normalize(direction);
+
+		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+		//glm::mat4 view = glm::lookAt()
+		//glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(0), cameraUp);
+		//glm::mat4 view = glm::mat4(1.0f);
+		//view = glm::translate(view, player.getTransform().position);
+		//view = glm::rotate(view, glm::radians(player.getTransform().rotationAngle), glm::vec3(0, 1, 0));
+		//std::cout << player.getTransform().rotationAngle << std::endl;
+
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
 		litShader.setVec3("_ViewPos", cameraPos);
@@ -203,10 +217,10 @@ void processInput(GLFWwindow* window)
 	glm::vec3 camUp = glm::normalize(glm::cross(camRight, player.getFrontDir()));
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		player.move(player.getFrontDir());
+		player.move(cameraFront);
 		//cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		player.move(-player.getFrontDir());
+		player.move(-cameraFront);
 		//cameraPos -= cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		player.turnLeft();
