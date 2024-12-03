@@ -47,28 +47,28 @@ vec3 CalculatePixelation();
 
 //Fog 
 uniform bool _FogEnabled;
-uniform float _FogStart = 5.0;
-uniform float _FogEnd = 100.0;
+uniform float _FogStart = 3.0;
+uniform float _FogEnd = 15.0;
 uniform vec3 _FogColor = vec3(1);
 uniform float _FogExponential = 2.0;
 
 float CalculateFogFactor();
 
 //Dithering
-uniform int _DitherPattern;
-uniform float _DitherThreshold = 0.5;
-uniform float _DitherStrength = 1;
-uniform float _DitherScale = 1;
+uniform int _DitherEnabled;
+uniform float _DitherThreshold;
+uniform float _DitherScale;
+uniform float _TexelSize;
 
-mat4x4 ditherPaterns = mat4x4(0, 1, 0, 1,
+mat4x4 ditherPatern = mat4x4(0, 1, 0, 1,
                               1, 0, 1, 0,
                               0, 1, 0, 1,
                               1, 0, 1, 0);
 
 float PixelBrightness(vec3 pixelColor);
 vec4 GetTexelSize(float width, float height);
-float GetDitherValue(vec2 uv, float brightness, mat4x4 pattern);
-float CalculateDitherCoordinate(vec3 pixelColor);
+float Get4x4TexValue(vec2 uv, float brightness);
+vec3 CalculateDitherCoordinate(vec3 color);
 
 void main() {
     // deciding which sampler2d to use
@@ -82,13 +82,13 @@ void main() {
 
     //Pixelation
     if (_PixelationEnabled){
-        result *= CalculatePixelation();
+        result *= CalculatePixelation();        
     }
     else{
         result = result * texture(textures[_ActiveTexture],TexCoord).rgb;
     }
 
-    //result *= CalculateDitherCoordinate(result);
+    result *= CalculateDitherCoordinate(result);
 
 	FragColor = vec4(result, 1.0);
 }
@@ -102,24 +102,21 @@ vec4 GetTexelSize(float width, float height){
     return vec4(1 / width, 1 / height, width, height);
 }
 
-float GetDitherValue(vec2 uv, float brightness, mat4x4 pattern){
+float Get4x4TexValue(vec2 uv, float brightness){
     int x = int(mod(uv.x, 4.0));
     int y = int(mod(uv.y, 4.0));
 
-    return brightness * _DitherThreshold < ditherPaterns[x][y] ? 0 : 1;
+    return brightness * _DitherThreshold < ditherPatern[x][y] ? 0 : 1;
 }
 
-float CalculateDitherCoordinate(vec3 pixelColor){
-    vec4 texelSize = GetTexelSize(1, 1);
-    //Need view space 
+vec3 CalculateDitherCoordinate(vec3 color){
+    vec4 texelSize = GetTexelSize(_TexelSize, _TexelSize);
     vec2 screenCoordinate = ClipSpace.xy / ClipSpace.w;
     vec2 ditherCoordinate = screenCoordinate * texelSize.xy;
     ditherCoordinate /= _DitherScale;
 
-    float brightness = PixelBrightness(pixelColor);
-    float ditherPixel = GetDitherValue(TexCoord, brightness, ditherPaterns);
-    //return pixelColor * ditherPixel;
-    return 0;
+    float ditherPixel = Get4x4TexValue(ditherCoordinate.xy, PixelBrightness(color));
+    return color * ditherPixel;
 }
 
 //Returns a scaled texture UV and color value

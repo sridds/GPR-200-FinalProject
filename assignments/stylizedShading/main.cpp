@@ -21,8 +21,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-const int SCREEN_WIDTH = 1500;
-const int SCREEN_HEIGHT = 1000;
+const int SCREEN_WIDTH = 1080;
+const int SCREEN_HEIGHT = 1080;
 
 #pragma region Maze Settings
 const int MAZE_SIZE = 19;
@@ -109,8 +109,8 @@ Transform mazeTransform;
 #pragma region Lighting Settings
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
-	float ambientK = 0.1f;
-	float diffuseK = 0.5f;
+	float ambientK = 0.35f;
+	float diffuseK = 0.65f;
 	float specularK = 0.5f;
 	float shininess = 64.0f;
 	bool blinnPhong = true;
@@ -121,7 +121,7 @@ bool pointRender = false;
 
 //Toon shading Settings
 bool isToonShading = true;
-int toonShadingLevels = 4;
+int toonShadingLevels = 8;
 
 bool isRimLighting = false;
 float rimLightFalloff = 8.0;
@@ -130,15 +130,21 @@ float rimLightIntensity = 0.3;
 //Fog Settings
 bool isFogEnabled = true;
 float fogStart = 5.0;
-float fogEnd = 100.0;
-float fogExponential = 2.0;
-glm::vec3 fogColor = glm::vec3(1);
+float fogEnd = 15.0;
+float fogExponential = 3.0;
+glm::vec3 fogColor = glm::vec3(0);
 
 //Pixelation
 bool isPixelationEnabled = true;
 float widthPixelation = 256;
-float heightPixelation = 256;
-float colorPrecision = 16;
+float heightPixelation = 128;
+float colorPrecision = 8;
+
+//Dithering
+bool isDitherEnabled = true;
+float ditherThreshold = 1.5f;
+float ditherScale = 0.1f;
+float texelSize = 0.1f;
 #pragma endregion
 
 int main() {
@@ -278,6 +284,12 @@ int main() {
 		litShader.setFloat("_FogExponential", fogExponential);
 		litShader.setVec3("_FogColor", fogColor);
 
+		//Set Dither settings
+		litShader.setInt("_DitherEnabled", isDitherEnabled);
+		litShader.setFloat("_DitherThreshold", ditherThreshold);
+		litShader.setFloat("_DitherScale", ditherScale);
+		litShader.setFloat("_TexelSize", texelSize);
+
 		//Draw plane
 		litShader.setMat4("_Model", planeTransform.getModelMatrix());
 		litShader.setInt("_MazeSize", MAZE_SIZE);
@@ -371,11 +383,15 @@ int main() {
 				ImGui::SliderFloat("Rim Lighting Falloff", &rimLightFalloff, 0.0f, 64.0f);
 				ImGui::SliderFloat("Rim Light Intensity", &rimLightIntensity, 0.0f, 5.0f);
 			}
-			if (ImGui::CollapsingHeader("Pixelation Shading")) {
+			if (ImGui::CollapsingHeader("Pixelation & Dither Shading")) {
 				ImGui::Checkbox("Enabled Pixelation", &isPixelationEnabled);
 				ImGui::InputFloat("Pixelation Width", &widthPixelation);
 				ImGui::InputFloat("Pixelation Height", &heightPixelation);
 				ImGui::InputFloat("Color Precision", &colorPrecision, 1, 256);
+				ImGui::Checkbox("Enable Dithering", &isDitherEnabled);
+				ImGui::InputFloat("Dither Threshold", &ditherThreshold, 0.1f);
+				ImGui::InputFloat("Dither Scale", &ditherScale, 0.1f);
+				ImGui::InputFloat("Texel Size", &texelSize, 0.1f);
 			}
 		}
 
