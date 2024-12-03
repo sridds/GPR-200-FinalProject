@@ -8,11 +8,11 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include <ew/transform.h>
 #include <ew/procGen.h>
 #include <ew/mesh.h>
 #include <ew/shader.h>
 #include <ew/texture.h>
+#include <ew/player.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
