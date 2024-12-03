@@ -55,7 +55,7 @@ uniform float _FogExponential = 2.0;
 float CalculateFogFactor();
 
 //Dithering
-uniform int _DitherEnabled;
+uniform bool _DitherEnabled;
 uniform float _DitherThreshold;
 uniform float _DitherScale;
 uniform float _TexelSize;
@@ -85,10 +85,13 @@ void main() {
         result *= CalculatePixelation();        
     }
     else{
-        result = result * texture(textures[_ActiveTexture],TexCoord).rgb;
+        result *= texture(textures[_ActiveTexture],TexCoord).rgb;
     }
 
-    result *= CalculateDitherCoordinate(result);
+    //Dithering
+    if (_DitherEnabled){
+        result = CalculateDitherCoordinate(result);
+    }
 
 	FragColor = vec4(result, 1.0);
 }
