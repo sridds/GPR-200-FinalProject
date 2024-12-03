@@ -128,10 +128,17 @@ float rimLightFalloff = 8.0;
 float rimLightIntensity = 0.3;
 
 //Fog Settings
+bool isFogEnabled = true;
 float fogStart = 5.0;
 float fogEnd = 100.0;
 float fogExponential = 2.0;
 glm::vec3 fogColor = glm::vec3(1);
+
+//Pixelation
+bool isPixelationEnabled = true;
+float widthPixelation = 256;
+float heightPixelation = 256;
+float colorPrecision = 16;
 #pragma endregion
 
 int main() {
@@ -258,7 +265,14 @@ int main() {
 		litShader.setFloat("_RimLightFalloff", rimLightFalloff);
 		litShader.setFloat("_RimLightIntensity", rimLightIntensity);
 
+		//Set Pixelation settings
+		litShader.setInt("_PixelationEnabled", isPixelationEnabled);
+		litShader.setFloat("_WidthPixelation", widthPixelation);
+		litShader.setFloat("_HeightPixelation", heightPixelation);
+		litShader.setFloat("_ColorPrecision", colorPrecision);
+
 		//Fog settings
+		litShader.setInt("_FogEnabled", isFogEnabled);
 		litShader.setFloat("_FogStart", fogStart);
 		litShader.setFloat("_FogEnd", fogEnd);
 		litShader.setFloat("_FogExponential", fogExponential);
@@ -349,15 +363,24 @@ int main() {
 			ImGui::Checkbox("Draw as Points", &pointRender);
 		}
 
-		if (ImGui::CollapsingHeader("Toon Shading Settings")) {
-			ImGui::Checkbox("Enable Toon Shading", &isToonShading);
-			ImGui::SliderInt("Toon Levels", &toonShadingLevels, 2.0f, 64.0f);
-			ImGui::Checkbox("Enable Rim Lighting", &isRimLighting);
-			ImGui::SliderFloat("Rim Lighting Falloff", &rimLightFalloff, 0.0f, 64.0f);
-			ImGui::SliderFloat("Rim Light Intensity", &rimLightIntensity, 0.0f, 5.0f);
+		if (ImGui::CollapsingHeader("Shading Settings")) {
+			if (ImGui::CollapsingHeader("Toon & Rimlight Shading")) {
+				ImGui::Checkbox("Enable Toon Shading", &isToonShading);
+				ImGui::SliderInt("Toon Levels", &toonShadingLevels, 2.0f, 64.0f);
+				ImGui::Checkbox("Enable Rim Lighting", &isRimLighting);
+				ImGui::SliderFloat("Rim Lighting Falloff", &rimLightFalloff, 0.0f, 64.0f);
+				ImGui::SliderFloat("Rim Light Intensity", &rimLightIntensity, 0.0f, 5.0f);
+			}
+			if (ImGui::CollapsingHeader("Pixelation Shading")) {
+				ImGui::Checkbox("Enabled Pixelation", &isPixelationEnabled);
+				ImGui::InputFloat("Pixelation Width", &widthPixelation);
+				ImGui::InputFloat("Pixelation Height", &heightPixelation);
+				ImGui::SliderFloat("Color Precision", &colorPrecision, 1, 256);
+			}
 		}
 
 		if (ImGui::CollapsingHeader("Fog Settings")) {
+			ImGui::Checkbox("Enable Fog", &isFogEnabled);
 			ImGui::InputFloat("Fog start", &fogStart);
 			ImGui::InputFloat("Fog end", &fogEnd);
 			ImGui::SliderFloat("Fog density", &fogExponential, 0.0f, 10.0f);
