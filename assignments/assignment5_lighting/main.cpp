@@ -198,7 +198,8 @@ void processInput(GLFWwindow* window)
 	float cameraSpeed = 2.5f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		cameraSpeed *= 2.0f;
-	glm::vec3 camRight = glm::normalize(glm::cross(player.getFrontDir(), cameraUp));
+
+	glm::vec3 camRight = glm::normalize(glm::cross(cameraFront, cameraUp));
 	glm::vec3 camUp = glm::normalize(glm::cross(camRight, player.getFrontDir()));
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)

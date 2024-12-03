@@ -15,7 +15,7 @@ private:
 	float m_targetYaw;
 	float m_curYaw;
 
-	glm::vec3 m_front;
+	glm::vec3 m_front = glm::vec3(0.0f, 0.0f, -1.0f);
 
 	// flags
 	bool m_isMoving;

@@ -1,6 +1,7 @@
 #include "player.h"
 
 float elapsed = 0.0f;
+float rotationElapsed = 0.0f;
 
 const Transform& Player::getTransform()
 {
@@ -22,9 +23,10 @@ void Player::turnLeft()
 {
 	if(m_isMoving || m_isTurning) return;
 
-	m_startYaw = m_front.x;
+	// cos(yaw) * cos(pitch)
+	m_startYaw = cos(m_front.x) * cos(m_front.y);
 	m_targetYaw = m_curYaw - 90.0f;
-	elapsed = 0.0f;
+	rotationElapsed = 0.0f;
 
 	m_isTurning = true;
 }
@@ -33,9 +35,9 @@ void Player::turnRight()
 {
 	if(m_isMoving || m_isTurning) return;
 
-	m_startYaw = m_front.x;
+	m_startYaw = cos(m_front.x) * cos(m_front.y);
 	m_targetYaw = m_curYaw + 90.0f;
-	elapsed = 0.0f;
+	rotationElapsed = 0.0f;
 
 	m_isTurning = true;
 }
@@ -67,11 +69,12 @@ void Player::updateRot(float deltaTime)
 {
 	glm::vec3 m_dir;
 	m_dir.x = cos(glm::radians(m_curYaw)) * cos(glm::radians(m_curYaw));
-	m_front = glm::normalize(m_dir);
 
-	if (elapsed < m_duration) {
-		elapsed += deltaTime;
-		float t = elapsed / m_duration;
+	if(m_isTurning) m_front = glm::normalize(m_dir);
+
+	if (rotationElapsed < m_duration) {
+		rotationElapsed += deltaTime;
+		float t = rotationElapsed / m_duration;
 
 		// ease out quart function https://easings.net/#easeOutQuart
 		m_curYaw = glm::mix(m_startYaw, m_targetYaw, 1 - pow(1 - t, 4));
