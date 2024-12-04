@@ -1,4 +1,5 @@
 #include "player.h"
+#include <iostream>
 
 float elapsed = 0.0f;
 float rotationElapsed = 0.0f;
@@ -6,6 +7,17 @@ float rotationElapsed = 0.0f;
 const Transform& Player::getTransform()
 {
 	return m_transform;
+}
+
+bool Player::isMoving() {
+	return m_isMoving;
+}
+bool Player::isTurning() {
+	return m_isTurning;
+}
+
+int Player::getDirection() {
+	return m_direction;
 }
 
 void Player::move(glm::vec3 amount)
@@ -16,12 +28,19 @@ void Player::move(glm::vec3 amount)
 	m_startPosition = m_transform.position;
 	elapsed = 0.0f;
 
+	std::cout << "(" << amount.x << ", " << amount.y << ", " << amount.z << ")" << std::endl;
+
+	cellPos += glm::vec2(amount.x, amount.z);
+
 	m_isMoving = true;
 }
 
 void Player::turnLeft()
 {
 	if(m_isMoving || m_isTurning) return;
+
+	m_direction--;
+	m_direction %= 4;
 
 	// cos(yaw) * cos(pitch)
 	m_startYaw = m_curYaw;
@@ -34,6 +53,9 @@ void Player::turnLeft()
 void Player::turnRight()
 {
 	if(m_isMoving || m_isTurning) return;
+
+	m_direction++;
+	m_direction %= 4;
 
 	m_startYaw = m_curYaw;
 	m_targetYaw = m_curYaw + 90.0f;
@@ -83,10 +105,19 @@ void Player::updateRot(float deltaTime)
 	}
 }
 
-Player::Player(float duration, float stepSize)
+Player::Player(float duration, float stepSize, glm::vec3 startPosition)
 {
-	m_transform.rotation = glm::vec3(0, 1, 0);
-	m_transform.rotationAngle = 0.0f;
+	m_transform.position = startPosition;
+	m_startPosition = startPosition;
+	m_targetPosition = startPosition;
+
+	//m_transform.rotation = glm::vec3(0, 0, 0);
+	float forward = 90.0f;
+
+	m_curYaw = forward;
+	m_startYaw = forward;
+	m_targetYaw = forward;
+	m_transform.rotationAngle = forward;
 
 	m_duration = duration;
 	m_stepSize = stepSize;
@@ -94,17 +125,11 @@ Player::Player(float duration, float stepSize)
 
 glm::vec3 Player::getFrontDir()
 {
-	glm::vec3 m_dir;
-	m_dir.x = cos(glm::radians(m_curYaw)) * cos(glm::radians(m_curYaw));
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(m_transform.rotationAngle)) * cos(glm::radians(0.0f));
+	direction.y = sin(glm::radians(0.0f));
+	direction.z = sin(glm::radians(m_transform.rotationAngle)) * cos(glm::radians(0.0f));
+	m_front = glm::normalize(direction);
 
-	m_front = glm::normalize(m_dir);
-
-	/*
-		glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
-	cameraFront = glm::normalize(direction);*/
 	return m_front;
 }

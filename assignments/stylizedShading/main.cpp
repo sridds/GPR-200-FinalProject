@@ -25,11 +25,11 @@ const int SCREEN_WIDTH = 1500;
 const int SCREEN_HEIGHT = 1000;
 
 #pragma region Maze Settings
-const int MAZE_SIZE = 19;
+const int MAZE_SIZE = 5;
 float WALL_SIZE = 1.0f;
 float WALL_HEIGHT = 1.0f;
 
-float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
+float tempMazeOG[19][19] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
@@ -51,26 +51,12 @@ float tempMaze[MAZE_SIZE][MAZE_SIZE] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
 
-float presetMaze1[MAZE_SIZE][MAZE_SIZE] = {
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
-	{1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
-	{1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1},
-	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1},
-	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
-	{1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1},
-	{1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
-	{1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-	{1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1},
-	{1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
-	{1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1},
-	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1},
-	{1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
-	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+float tempMaze[5][5] = {
+	{1, 1, 1, 1, 1},
+	{1, 0, 0, 1, 1},
+	{1, 0, 0, 1, 1},
+	{1, 1, 0, 0, 1},
+	{1, 1, 1, 1, 1},
 };
 
 // calculating center of maze for camera start pos
@@ -87,9 +73,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void createCubeMaze(float size, ew::MeshData* mesh);
 static void createCubeFaceMaze(const glm::vec3& normal, float size, ew::MeshData* mesh);
 
+// player
+Player player = Player(0.5f, 2.0f, glm::vec3(mazeCenterX, 1.0f, mazeCenterZ + WALL_SIZE));
+
 //CAMERA
 glm::vec3 cameraPos = glm::vec3(mazeCenterX, 1.0f, mazeCenterZ + WALL_SIZE);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float yaw = -90.0f, pitch = 0;
 float lastX = 400, lastY = 300;
@@ -142,6 +131,11 @@ float colorPrecision = 16;
 #pragma endregion
 
 int main() {
+	//setup player
+	player.cellPos = glm::vec2(((MAZE_SIZE + 1) / 2.0f) - 1, ((MAZE_SIZE + 1) / 2.0f) - 1);
+
+	std::cout << player.cellPos.x << ", " << player.cellPos.y << std::endl;
+
 	#pragma region Window Creation
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -240,9 +234,13 @@ int main() {
 		lightTransform.rotation = glm::vec3(1.0, 0.0, 1.0);
 		lightTransform.rotationAngle = glfwGetTime() * 20.0f;
 
+		player.update(deltaTime);
+		cameraPos = player.getTransform().position;
+
 		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + player.getFrontDir(), cameraUp);
+		//glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
 		#pragma region Shader Programs
@@ -407,42 +405,73 @@ int main() {
 	return 0;
 }
 
+
 #pragma region Input Functions
 void processInput(GLFWwindow* window)
 {
 	//Only allow camera input
 	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
 		//Release cursor
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		firstMouse = true;
-		return;
+		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		//firstMouse = true;
+		//return;
 	}
 	else {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
-	
-	float cameraSpeed = 5.0f * deltaTime;
+
+	float cameraSpeed = 2.5f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		cameraSpeed *= 2.0f;
-	glm::vec3 camRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-	glm::vec3 camUp = glm::normalize(glm::cross(camRight, cameraFront));
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraFront;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraFront;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= camRight * cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += camRight * cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		cameraPos -= camUp * cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		cameraPos += camUp * cameraSpeed;
+	glm::vec3 camRight = glm::normalize(glm::cross(cameraFront, cameraUp));
+	glm::vec3 camUp = glm::normalize(glm::cross(camRight, player.getFrontDir()));
+
+	if (player.isMoving() || player.isTurning()) return;
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+
+		int x = player.cellPos.x + (int)player.getFrontDir().x;
+		int y = player.cellPos.y + (int)player.getFrontDir().z;
+
+		float val = tempMaze[x][y];
+		
+		if (val == 0) {
+			player.move(player.getFrontDir());
+			std::cout << "Player: (" << x << ", " << y << ")" << std::endl;
+		}
+		else {
+			std::cout << "tried to move to (" << x << ", " << y << ")" << std::endl;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		int x = player.cellPos.x - (int)player.getFrontDir().x;
+		int y = player.cellPos.y - (int)player.getFrontDir().z;
+
+		float val = tempMaze[x][y];
+
+		if (val == 0) {
+			player.move(-player.getFrontDir());
+			std::cout << "Player: (" << x << ", " << y << ")" << std::endl;
+		}
+		else {
+			std::cout << "tried to move to (" << x << ", " << y << ")" << std::endl;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		player.turnLeft();
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		player.turnRight();
+	}
 }
 
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+	/*
 	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
 		return;
 
@@ -475,7 +504,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
-	cameraFront = glm::normalize(direction);
+	cameraFront = glm::normalize(direction);*/
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)

@@ -14,8 +14,9 @@ private:
 	float m_startYaw;
 	float m_targetYaw;
 	float m_curYaw;
+	int m_direction;
 
-	glm::vec3 m_front = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 m_front;
 
 	// flags
 	bool m_isMoving;
@@ -29,11 +30,16 @@ public:
 	// returns the transform of the player
 	const Transform& getTransform();
 	glm::vec3 getFrontDir();
+	glm::vec2 cellPos;
 
 	void move(glm::vec3 amount); // called whenever we need to update the target position
 	void turnLeft();
 	void turnRight();
 	void update(float deltaTime); // should be called in a loop
 
-	Player(float duration, float stepSize);
+	bool isMoving();
+	bool isTurning();
+	int getDirection();
+
+	Player(float duration, float stepSize, glm::vec3 startPosition);
 };

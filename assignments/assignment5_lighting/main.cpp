@@ -25,13 +25,15 @@ const int SCREEN_HEIGHT = 720;
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+bool canPlayerMove(glm::vec3 amount);
+
 const int NUM_CUBES = 20;
 
 glm::vec3 cubePositions[NUM_CUBES];
 
 //CAMERA
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float yaw = -90.0f, pitch = 0;
 float lastX = 400, lastY = 300;
@@ -45,7 +47,7 @@ float orthoHeight = 10.0f;
 glm::vec3 lightPosition = glm::vec3(0);
 glm::vec3 lightColor = glm::vec3(1);
 
-Player player = Player(0.5f, 2.0f);
+Player player = Player(0.5f, 2.0f, glm::vec3(0));
 
 struct Material {
 	float ambientK = 0.1f;
@@ -129,7 +131,7 @@ int main() {
 		direction.z = sin(glm::radians(player.getTransform().rotationAngle)) * cos(glm::radians(0.0f));
 		cameraFront = glm::normalize(direction);
 
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + player.getFrontDir(), cameraUp);
 
 		//glm::mat4 view = glm::lookAt()
 		//glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(0), cameraUp);
@@ -194,6 +196,11 @@ int main() {
 		glfwSwapBuffers(window);
 	}
 	printf("Shutting down...");
+}
+
+bool canPlayerMove(glm::vec3 amount) 
+{
+
 }
 
 void processInput(GLFWwindow* window)
