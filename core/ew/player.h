@@ -4,7 +4,6 @@ class Player {
 private:
 	Transform m_transform;
 	float m_duration; // the amount of time it takes to lerp to a position
-	float m_stepSize; // the size of each step
 
 	// positions for lerping
 	glm::vec3 m_startPosition;
@@ -14,6 +13,7 @@ private:
 	float m_startYaw;
 	float m_targetYaw;
 	float m_curYaw;
+
 	int m_direction;
 
 	glm::vec3 m_front;
@@ -32,14 +32,19 @@ public:
 	glm::vec3 getFrontDir();
 	glm::vec2 cellPos;
 
-	void move(glm::vec3 amount); // called whenever we need to update the target position
+	void moveForward(); // called whenever we need to update the target position
+	void moveBackward();
+
 	void turnLeft();
 	void turnRight();
 	void update(float deltaTime); // should be called in a loop
+	glm::vec2 getProjectedForwardCell();
+	glm::vec2 getProjectedBackwardCell();
 
 	bool isMoving();
 	bool isTurning();
 	int getDirection();
+	float getYaw();
 
-	Player(float duration, float stepSize, glm::vec3 startPosition);
+	Player(float duration, glm::vec3 startPosition);
 };

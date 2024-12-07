@@ -20,19 +20,68 @@ int Player::getDirection() {
 	return m_direction;
 }
 
-void Player::move(glm::vec3 amount)
+void Player::moveForward()
 {
 	if(m_isMoving || m_isTurning) return;
 
-	m_targetPosition = m_transform.position + (amount * m_stepSize);
+	m_targetPosition = m_transform.position + (getFrontDir() * 2.0f);
 	m_startPosition = m_transform.position;
 	elapsed = 0.0f;
 
-	std::cout << "(" << amount.x << ", " << amount.y << ", " << amount.z << ")" << std::endl;
-
-	cellPos += glm::vec2(amount.x, amount.z);
+	cellPos = getProjectedForwardCell();
 
 	m_isMoving = true;
+}
+
+void Player::moveBackward()
+{
+	if (m_isMoving || m_isTurning) return;
+
+	m_targetPosition = m_transform.position + (-getFrontDir() * 2.0f);
+	m_startPosition = m_transform.position;
+	elapsed = 0.0f;
+
+	cellPos = getProjectedBackwardCell();
+
+	m_isMoving = true;
+}
+
+glm::vec2 Player::getProjectedForwardCell() {
+	glm::vec2 temp = cellPos;
+
+	if (m_direction == 0) {
+		temp -= glm::vec2(1.0f, 0.0f);
+	}
+	else if (m_direction == 1) {
+		temp += glm::vec2(0.0f, 1.0f);
+	}
+	else if (m_direction == 2) {
+		temp -= glm::vec2(-1.0f, 0.0f);
+	}
+	else if (m_direction == 3) {
+		temp += glm::vec2(0.0f, -1.0f);
+	}
+
+	return temp;
+}
+
+glm::vec2 Player::getProjectedBackwardCell() {
+	glm::vec2 temp = cellPos;
+
+	if (m_direction == 0) {
+		temp += glm::vec2(1.0f, 0.0f);
+	}
+	else if (m_direction == 1) {
+		temp -= glm::vec2(0.0f, 1.0f);
+	}
+	else if (m_direction == 2) {
+		temp += glm::vec2(-1.0f, 0.0f);
+	}
+	else if (m_direction == 3) {
+		temp -= glm::vec2(0.0f, -1.0f);
+	}
+
+	return temp;
 }
 
 void Player::turnLeft()
@@ -42,7 +91,8 @@ void Player::turnLeft()
 	m_direction--;
 	m_direction %= 4;
 
-	// cos(yaw) * cos(pitch)
+	if (m_direction < 0) m_direction = 3;
+
 	m_startYaw = m_curYaw;
 	m_targetYaw = m_curYaw - 90.0f;
 	rotationElapsed = 0.0f;
@@ -56,6 +106,8 @@ void Player::turnRight()
 
 	m_direction++;
 	m_direction %= 4;
+
+	if (m_direction < 0) m_direction = 3;
 
 	m_startYaw = m_curYaw;
 	m_targetYaw = m_curYaw + 90.0f;
@@ -87,6 +139,10 @@ void Player::updatePos(float deltaTime)
 	}
 }
 
+float Player::getYaw() {
+	return m_curYaw;
+}
+
 void Player::updateRot(float deltaTime)
 {
 	if (rotationElapsed < m_duration) {
@@ -105,22 +161,20 @@ void Player::updateRot(float deltaTime)
 	}
 }
 
-Player::Player(float duration, float stepSize, glm::vec3 startPosition)
+Player::Player(float duration, glm::vec3 startPosition)
 {
 	m_transform.position = startPosition;
 	m_startPosition = startPosition;
 	m_targetPosition = startPosition;
 
 	//m_transform.rotation = glm::vec3(0, 0, 0);
-	float forward = 90.0f;
+	float forward = 180.0f + 90.0f;
 
 	m_curYaw = forward;
 	m_startYaw = forward;
 	m_targetYaw = forward;
 	m_transform.rotationAngle = forward;
-
 	m_duration = duration;
-	m_stepSize = stepSize;
 }
 
 glm::vec3 Player::getFrontDir()

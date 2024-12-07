@@ -224,10 +224,10 @@ void processInput(GLFWwindow* window)
 	glm::vec3 camUp = glm::normalize(glm::cross(camRight, player.getFrontDir()));
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		player.move(cameraFront);
+		player.moveForward(cameraFront);
 		//cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		player.move(-cameraFront);
+		player.moveForward(-cameraFront);
 		//cameraPos -= cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		player.turnLeft();

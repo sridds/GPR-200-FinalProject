@@ -50,18 +50,17 @@ float tempMazeOG[19][19] = {
 	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
-
-float tempMaze[5][5] = {
-	{1, 1, 1, 1, 1},
-	{1, 0, 0, 1, 1},
-	{1, 0, 0, 1, 1},
-	{1, 1, 0, 0, 1},
-	{1, 1, 1, 1, 1},
+float tempMaze[19][19] = {
+	{1, 1, 1, 1, 1,},
+	{1, 0, 0, 1, 1,},
+	{1, 1, 0, 0, 1,},
+	{1, 0, 0, 1, 1,},
+	{1, 1, 1, 1, 1,}
 };
 
 // calculating center of maze for camera start pos
-float mazeCenterX = (MAZE_SIZE / 2.0f) * WALL_SIZE * 2.0f;
-float mazeCenterZ = (MAZE_SIZE / 2.0f) * WALL_SIZE * 2.0f;
+float mazeCenterX = (((float)MAZE_SIZE) / 2.0f) * WALL_SIZE * 2.0f;
+float mazeCenterZ = (((float)MAZE_SIZE) / 2.0f) * WALL_SIZE * 2.0f;
 #pragma endregion
 
 // function identifiers
@@ -69,17 +68,25 @@ float mazeCenterZ = (MAZE_SIZE / 2.0f) * WALL_SIZE * 2.0f;
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+void handlePlayerMovement(GLFWwindow* window);
+void handleFreecamMovement(GLFWwindow* window);
+
 // mesh functions
 void createCubeMaze(float size, ew::MeshData* mesh);
 static void createCubeFaceMaze(const glm::vec3& normal, float size, ew::MeshData* mesh);
 
-// player
-Player player = Player(0.5f, 2.0f, glm::vec3(mazeCenterX, 1.0f, mazeCenterZ + WALL_SIZE));
+// Player
+Player player = Player(0.4f, glm::vec3(mazeCenterX, 1.0f, mazeCenterZ - (WALL_SIZE)));
 
-//CAMERA
+// Free cam
 glm::vec3 cameraPos = glm::vec3(mazeCenterX, 1.0f, mazeCenterZ + WALL_SIZE);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+bool freeCamEnabled = false;
+
+
 float yaw = -90.0f, pitch = 0;
 float lastX = 400, lastY = 300;
 bool firstMouse = true;
@@ -220,6 +227,9 @@ int main() {
 
 	// Render loop
 	while (!glfwWindowShouldClose(window)) {
+		mazeCenterX = (MAZE_SIZE / 2.0f) * WALL_SIZE * 2.0f;
+		mazeCenterZ = ((MAZE_SIZE / 2.0f) - 1) * WALL_SIZE * 2.0f;
+
 		glfwPollEvents();
 		processInput(window);
 
@@ -241,11 +251,20 @@ int main() {
 		lightTransform.rotationAngle = glfwGetTime() * 20.0f;
 
 		player.update(deltaTime);
-		cameraPos = player.getTransform().position;
-
 		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
+		glm::mat4 view;
 
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		if (freeCamEnabled) {
+			view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		} else {
+			//cameraPos = player.getTransform().position;
+			std::cout << player.getTransform().position.x << " fucking penis my " << player.getTransform().position.z << std::endl;
+
+			cameraPos = glm::vec3(((player.getTransform().position.x * WALL_SIZE)), player.getTransform().position.y, ((player.getTransform().position.z) * WALL_SIZE));
+
+			view = glm::lookAt(cameraPos, cameraPos + player.getFrontDir(), cameraUp);
+		}
+
 		//glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
@@ -402,7 +421,6 @@ int main() {
 		}
 
 		if (ImGui::CollapsingHeader("Maze Settings")) {
-			ImGui::SliderFloat("Wall Size", &WALL_SIZE, 0.05f, 5.0f);
 			ImGui::SliderFloat("Wall Height", &WALL_HEIGHT, 0.2f, 3.5f);
 		}
 		ImGui::End();
@@ -421,16 +439,42 @@ int main() {
 	return 0;
 }
 
+bool isKey = false;
 
 #pragma region Input Functions
 void processInput(GLFWwindow* window)
 {
+	// Swap modes
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !isKey) {
+		freeCamEnabled = !freeCamEnabled;
+
+		if (freeCamEnabled) {
+			cameraPos = player.getTransform().position;
+			//cameraPos = glm::vec3(((player.getTransform().position.x * WALL_SIZE)), player.getTransform().position.y, ((player.getTransform().position.z + (WALL_SIZE)) * WALL_SIZE));
+
+			cameraFront = player.getFrontDir();
+			
+			lastX = 0.0f;
+			lastY = 0.0f;
+
+			pitch = 0.0f;
+			yaw = player.getYaw();
+
+			firstMouse = true;
+		}
+
+		isKey = true;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_F) != GLFW_PRESS) {
+		isKey = false;
+	}
+
 	//Only allow camera input
-	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
+	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) && freeCamEnabled) {
 		//Release cursor
-		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		//firstMouse = true;
-		//return;
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		firstMouse = true;
+		return;
 	}
 	else {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -443,39 +487,13 @@ void processInput(GLFWwindow* window)
 	glm::vec3 camRight = glm::normalize(glm::cross(cameraFront, cameraUp));
 	glm::vec3 camUp = glm::normalize(glm::cross(camRight, player.getFrontDir()));
 
-	if (player.isMoving() || player.isTurning()) return;
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-
-		int x = player.cellPos.x + (int)player.getFrontDir().x;
-		int y = player.cellPos.y + (int)player.getFrontDir().z;
-
-		float val = tempMaze[x][y];
-
-		player.move(cameraFront);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		int x = player.cellPos.x - (int)player.getFrontDir().x;
-		int y = player.cellPos.y - (int)player.getFrontDir().z;
-
-		float val = tempMaze[x][y];
-
-		player.move(-cameraFront);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		player.turnLeft();
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		player.turnRight();
-	}
+	if (!freeCamEnabled) handlePlayerMovement(window);
+	else handleFreecamMovement(window);
 }
 
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
+	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL || !freeCamEnabled)
 		return;
 
 	if (firstMouse) // initially set to true
@@ -483,6 +501,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 		lastX = xpos;
 		lastY = ypos;
 		firstMouse = false;
+		return;
 	}
 	
 	float xoffset = xpos - lastX;
@@ -508,6 +527,71 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
 	cameraFront = glm::normalize(direction);
+}
+
+void handlePlayerMovement(GLFWwindow* window) {
+	if (player.isMoving() || player.isTurning()) return;
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		glm::vec2 cell = player.getProjectedForwardCell();
+
+		int x = cell.x;
+		int y = cell.y;
+
+		float val = tempMaze[x][y];
+
+		if (val == 0) {
+			player.moveForward();
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		glm::vec2 cell = player.getProjectedBackwardCell();
+
+		int x = cell.x;
+		int y = cell.y;
+
+		float val = tempMaze[x][y];
+
+		if (val == 0) {
+			player.moveBackward();
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		player.turnLeft();
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		player.turnRight();
+	}
+}
+
+void handleFreecamMovement(GLFWwindow* window) {
+	float cameraSpeed = 2.5f * deltaTime;
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		cameraSpeed *= 2.0f;
+
+	glm::vec3 camRight = glm::normalize(glm::cross(cameraFront, cameraUp));
+	glm::vec3 camUp = glm::normalize(glm::cross(camRight, cameraFront));
+
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		cameraPos += cameraSpeed * cameraFront;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		cameraPos -= cameraSpeed * cameraFront;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		cameraPos -= cameraSpeed * camRight;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		cameraPos += cameraSpeed * camRight;
+	}
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
