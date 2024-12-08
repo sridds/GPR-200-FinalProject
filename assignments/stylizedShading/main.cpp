@@ -101,7 +101,7 @@ Transform mazeTransform;
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
 	float ambientK = 0.35f;
-	float diffuseK = 0.65f;
+	float diffuseK = 0.35f;
 	float specularK = 0.5f;
 	float shininess = 64.0f;
 	bool blinnPhong = true;
@@ -133,9 +133,9 @@ float colorPrecision = 8;
 
 //Dithering
 bool isDitherEnabled = true;
-float ditherThreshold = 1.5f;
+float ditherThreshold = 3.5f;
 float ditherScale = 0.1f;
-float texelSize = 0.1f;
+float texelSize = 0.03f;
 
 // Skybox
 float skyboxVertices[] = {
