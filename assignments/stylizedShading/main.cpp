@@ -25,11 +25,11 @@ const int SCREEN_WIDTH = 2000;
 const int SCREEN_HEIGHT = 1500;
 
 #pragma region Maze Settings
-const int MAZE_SIZE = 5;
+const int MAZE_SIZE = 19;
 float WALL_SIZE = 1.0f;
 float WALL_HEIGHT = 1.0f;
 
-float tempMazeOG[19][19] = {
+float tempMaze[19][19] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
@@ -49,13 +49,6 @@ float tempMazeOG[19][19] = {
 	{1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
 	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-};
-float tempMaze[19][19] = {
-	{1, 1, 1, 1, 1,},
-	{1, 0, 0, 1, 1,},
-	{1, 1, 0, 0, 1,},
-	{1, 0, 0, 1, 1,},
-	{1, 1, 1, 1, 1,}
 };
 
 // calculating center of maze for camera start pos
