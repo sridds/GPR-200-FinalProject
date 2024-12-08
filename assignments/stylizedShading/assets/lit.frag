@@ -41,16 +41,15 @@ uniform bool _PixelationEnabled = true;
 uniform float _WidthPixelation = 64;
 uniform float _HeightPixelation = 64;
 uniform float _ColorPrecision = 2;
-vec3 color;
 
-vec3 CalculatePixelation(bool isRoof);
+vec3 CalculatePixelation(vec3 pixelColor, bool isRoof);
 
 //Fog 
 uniform bool _FogEnabled;
-uniform float _FogStart = 3.0;
-uniform float _FogEnd = 15.0;
-uniform vec3 _FogColor = vec3(1);
-uniform float _FogExponential = 2.0;
+uniform float _FogStart;
+uniform float _FogEnd;
+uniform vec3 _FogColor;
+uniform float _FogExponential;
 
 float CalculateFogFactor();
 
@@ -59,16 +58,38 @@ uniform bool _DitherEnabled;
 uniform float _DitherThreshold;
 uniform float _DitherScale;
 uniform float _TexelSize;
+uniform int _DitherIndex;
+uniform float _DitherNear;
 
-mat4x4 ditherPatern = mat4x4(0, 1, 0, 1,
-                              1, 0, 1, 0,
-                              0, 1, 0, 1,
-                              1, 0, 1, 0);
+mat4x4 ditherPaterns[4] = mat4x4[4](
+                mat4x4(0, 1, 0, 1,
+                        1, 0, 1, 0,
+                        0, 1, 0, 1,
+                        1, 0, 1, 0),
+                    
+                    mat4x4(0.23, 0.2, 0.6, 0.2,
+                    0.2, 0.43, 0.2, 0.77,
+                    0.88, 0.2, 0.87, 0.2,
+                    0.2, 0.46, 0.2, 0), 
+
+                    mat4x4(-4.0, 0.0, -3.0, 1.0,
+                     2.0, -2.0, 3.0, -1.0,
+                     -3.0, 1.0, -4.0, 0.0,
+                     3.0, -1.0, 2.0, -2.0),
+
+                    mat4x4(1, 0, 0, 1,
+                          0, 1, 1, 0,
+                         0, 1, 1, 0,
+                        1, 0, 0, 1)
+                        );
 
 float PixelBrightness(vec3 pixelColor);
 vec4 GetTexelSize(float width, float height);
-float Get4x4TexValue(vec2 uv, float brightness);
-vec3 CalculateDitherCoordinate(vec3 color);
+float Get4x4TexValue(vec2 uv, float brightness, mat4x4 pattern);
+vec3 CalculateDitherCoordinate(vec3 pixelColor);
+
+//Calculate distance at start
+float cameraToPixel = length(WorldPos - _ViewPos);
 
 void main() {
     // deciding which sampler2d to use
@@ -88,18 +109,20 @@ void main() {
 
     //Pixelation
     if (_PixelationEnabled){
-        result *= CalculatePixelation(isRoof);        
+        result = CalculatePixelation(result, isRoof);        
     }
     else{
         if (isRoof)
-            result *= texture(textures[_ActiveTexture + 2],TexCoord).rgb;
+           result *= texture(textures[_ActiveTexture + 2],TexCoord).rgb;
         else
-            result *= texture(textures[_ActiveTexture],TexCoord).rgb;
+           result *= texture(textures[_ActiveTexture],TexCoord).rgb;
     }
 
     //Dithering
     if (_DitherEnabled){
-        result = CalculateDitherCoordinate(result);
+        //Remove dithering when a certain distance from the player
+        if (cameraToPixel > _DitherNear)
+            result = CalculateDitherCoordinate(result);
     }
 
 	FragColor = vec4(result, 1.0);
@@ -114,42 +137,65 @@ vec4 GetTexelSize(float width, float height){
     return vec4(1 / width, 1 / height, width, height);
 }
 
-float Get4x4TexValue(vec2 uv, float brightness){
+float Get4x4TexValue(vec2 uv, float brightness, mat4x4 pattern){
     int x = int(mod(uv.x, 4.0));
     int y = int(mod(uv.y, 4.0));
 
-    return brightness * _DitherThreshold < ditherPatern[x][y] ? 0 : 1;
+    return brightness * _DitherThreshold < pattern[x][y] ? 0 : 1;
 }
 
-vec3 CalculateDitherCoordinate(vec3 color){
+vec3 CalculateDitherCoordinate(vec3 pixelColor){
+    //Get the size of our texel
     vec4 texelSize = GetTexelSize(_TexelSize, _TexelSize);
+    
+    //Get screenspace coordinates (-1 to 1)
     vec2 screenCoordinate = ClipSpace.xy / ClipSpace.w;
+
+    //Get the coordinate of our dithering
     vec2 ditherCoordinate = screenCoordinate * texelSize.xy;
+
+    //Scale dithering
     ditherCoordinate /= _DitherScale;
 
-    float ditherPixel = Get4x4TexValue(ditherCoordinate.xy, PixelBrightness(color));
-    return color * ditherPixel;
+    //Changes pattern based on brightness
+    //int patternIndex = int(floor(PixelBrightness(color) * ditherPaterns.length()));
+
+    //Get the dither value of this pixel
+    float ditherPixel = Get4x4TexValue(ditherCoordinate.xy, PixelBrightness(pixelColor), ditherPaterns[_DitherIndex]);
+
+    //Apply to color and return
+    return pixelColor * ditherPixel;
 }
 
 //Returns a scaled texture UV and color value
-vec3 CalculatePixelation(bool isRoof){
+vec3 CalculatePixelation(vec3 pixelColor, bool isRoof){
     vec2 uv = TexCoord;
+
+    //Rescale texture coord resolution
     uv.x = floor(uv.x * _WidthPixelation) / _WidthPixelation;
     uv.y = floor(uv.y * _HeightPixelation) / _HeightPixelation;
-    if (isRoof)
-        color = texture(textures[_ActiveTexture + 2], uv).rgb;
-    else
-        color = texture(textures[_ActiveTexture], uv).rgb;
-    color = floor(color * _ColorPrecision) / _ColorPrecision;
 
-    return color;
+    if (isRoof)
+     pixelColor *= texture(textures[_ActiveTexture + 2], uv).rgb;
+    else
+      pixelColor *= texture(textures[_ActiveTexture], uv).rgb;
+
+    //Limit color palatte
+    pixelColor *= floor(pixelColor * _ColorPrecision) / _ColorPrecision;
+
+    return pixelColor;
 }
 
 float CalculateFogFactor(){
-    float cameraToPixel = length(WorldPos - _ViewPos);
+    //Determine fog range
     float fogRange = _FogEnd - _FogStart;
+
+    //Get the fog distance
     float fogDistance = _FogEnd - cameraToPixel;
+
+    //Calculate the fog factor
     float fogFactor = fogDistance / fogRange;
+
     return clamp(fogFactor, 0.0, 1.0);
 }
 
@@ -201,6 +247,7 @@ vec3 CalculateLighting()
 
     vec3 specular = specularStrength * spec * _LightColor;  
 
+    //Calculate rim lighting and apply it
     if (_RimLightingEnabled)
     {
         vec3 rimFactor = CalculateRimLighting(viewDir, norm);

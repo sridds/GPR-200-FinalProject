@@ -94,14 +94,13 @@ float orthoHeight = 10.0f;
 
 Transform lightTransform;
 Transform planeTransform;
-Transform sphereTransform;
 Transform mazeTransform;
 
 #pragma region Lighting Settings
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
-	float ambientK = 0.35f;
-	float diffuseK = 0.35f;
+	float ambientK = 0.65f;
+	float diffuseK = 0.45f;
 	float specularK = 0.5f;
 	float shininess = 64.0f;
 	bool blinnPhong = true;
@@ -114,15 +113,15 @@ bool pointRender = false;
 bool isToonShading = true;
 int toonShadingLevels = 8;
 
-bool isRimLighting = false;
+bool isRimLighting = true;
 float rimLightFalloff = 8.0;
-float rimLightIntensity = 0.3;
+float rimLightIntensity = 0.15;
 
 //Fog Settings
 bool isFogEnabled = true;
 float fogStart = 5.0;
-float fogEnd = 15.0;
-float fogExponential = 3.0;
+float fogEnd = 17.0;
+float fogExponential = 2.5;
 glm::vec3 fogColor = glm::vec3(0);
 
 //Pixelation
@@ -134,8 +133,10 @@ float colorPrecision = 8;
 //Dithering
 bool isDitherEnabled = true;
 float ditherThreshold = 3.5f;
-float ditherScale = 0.1f;
-float texelSize = 0.03f;
+float ditherScale = 0.05f;
+float texelSize = 0.1f;
+int ditherIndex = 0;
+float ditherNear = 1;
 
 // Skybox
 float skyboxVertices[] = {
@@ -220,13 +221,10 @@ int main() {
 
 	// temp meshes not yet dealt with
 	ew::MeshData planeMeshData;
-	ew::MeshData sphereMeshData;
 	// plane sits under maze, set to the size of the maze
 	float mazeLength = (MAZE_SIZE * (WALL_SIZE * 2)) / 3.0f;
 	ew::createPlaneXY(mazeLength, mazeLength, 5, &planeMeshData);
-	ew::createSphere(2.0f, 64, &sphereMeshData);
 	ew::Mesh planeMesh = ew::Mesh(planeMeshData);
-	ew::Mesh sphereMesh = ew::Mesh(sphereMeshData);
 
 	// cube mesh initializations
 	ew::MeshData cubeMeshData;
@@ -375,6 +373,8 @@ int main() {
 		litShader.setFloat("_DitherThreshold", ditherThreshold);
 		litShader.setFloat("_DitherScale", ditherScale);
 		litShader.setFloat("_TexelSize", texelSize);
+		litShader.setInt("_DitherIndex", ditherIndex);
+		litShader.setFloat("_DitherNear", ditherNear);
 
 		//Draw plane
 		litShader.setMat4("_Model", planeTransform.getModelMatrix());
@@ -384,12 +384,6 @@ int main() {
 		planeMesh.draw(drawMode);
 		// setting to wall texture
 		litShader.setInt("_ActiveTexture", 0);
-
-		// draw sphere
-		sphereTransform.position = glm::vec3(0.0f, 8.0f, 0.0f);
-		sphereTransform.scale = glm::vec3(0.75f);
-		litShader.setMat4("_Model", sphereTransform.getModelMatrix());
-		sphereMesh.draw(drawMode);
 		#pragma endregion
 
 		// if wall size is changed, scale the plane with it
@@ -498,6 +492,8 @@ int main() {
 				ImGui::InputFloat("Dither Threshold", &ditherThreshold, 0.1f);
 				ImGui::InputFloat("Dither Scale", &ditherScale, 0.1f);
 				ImGui::InputFloat("Texel Size", &texelSize, 0.1f);
+				ImGui::SliderInt("Dither Pattern", &ditherIndex, 0, 4);
+				ImGui::SliderFloat("Dither Near Plane", &ditherNear, 0, 15);
 			}
 		}
 
