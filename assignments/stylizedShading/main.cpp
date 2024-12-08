@@ -21,8 +21,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-const int SCREEN_WIDTH = 1080;
-const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 2000;
+const int SCREEN_HEIGHT = 1500;
 
 #pragma region Maze Settings
 const int MAZE_SIZE = 5;
@@ -196,13 +196,12 @@ int main() {
 	// shaders and textures
 	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 
-	unsigned int wallTex = ew::loadTexture("assets/undergroundBlock.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
-	unsigned int floorTex = ew::loadTexture("assets/abovegroundFloor.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
+	unsigned int wallTex = ew::loadTexture("assets/sethWall.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
+	unsigned int floorTex = ew::loadTexture("assets/sethFloor.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
+	unsigned int roofTex = ew::loadTexture("assets/sethRoof.png", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR);
 	
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
 	glPointSize(4.0);
 
 	//Set Plane transform
@@ -219,11 +218,16 @@ int main() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, floorTex);
 
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, roofTex);
+
+
 	litShader.use();
 
 	GLint texturesLocation = glGetUniformLocation(litShader.getShaderID(), "textures");
-	int textureUnits[] = {0, 1};
-	glUniform1iv(texturesLocation, 2, textureUnits);
+	int textureUnits[] = {0, 1, 2};
+	glUniform1iv(texturesLocation, 3
+		, textureUnits);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -256,16 +260,14 @@ int main() {
 
 		if (freeCamEnabled) {
 			view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		} else {
-			//cameraPos = player.getTransform().position;
-			std::cout << player.getTransform().position.x << " fucking penis my " << player.getTransform().position.z << std::endl;
-
+		} 
+		else 
+		{
 			cameraPos = glm::vec3(((player.getTransform().position.x * WALL_SIZE)), player.getTransform().position.y, ((player.getTransform().position.z) * WALL_SIZE));
 
 			view = glm::lookAt(cameraPos, cameraPos + player.getFrontDir(), cameraUp);
 		}
 
-		//glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		glm::mat4 projMatrix = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 1000.0f);
 
 		#pragma region Shader Programs

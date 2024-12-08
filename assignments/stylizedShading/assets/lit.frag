@@ -4,11 +4,11 @@ out vec4 FragColor;
 in vec3 WorldNormal;
 in vec3 WorldPos;
 in vec4 ClipSpace;
-
 in vec2 TexCoord;
+flat in int CubeFace; // 1 = right, 2 = left, 3 = front, 4 = back, 5 = top
 
 // textures[0] is the wall and textures[1] is the floor
-uniform sampler2D textures[2];
+uniform sampler2D textures[3];
 uniform int _ActiveTexture;
 
 uniform vec3 _LightColor = vec3(1);
@@ -43,7 +43,7 @@ uniform float _HeightPixelation = 64;
 uniform float _ColorPrecision = 2;
 vec3 color;
 
-vec3 CalculatePixelation();
+vec3 CalculatePixelation(bool isRoof);
 
 //Fog 
 uniform bool _FogEnabled;
@@ -72,6 +72,12 @@ vec3 CalculateDitherCoordinate(vec3 color);
 
 void main() {
     // deciding which sampler2d to use
+    bool isRoof = false;
+    if (CubeFace == 5)
+    {
+        isRoof = true;
+    }
+
     vec3 result = CalculateLighting();
     
     //Fog
@@ -82,10 +88,13 @@ void main() {
 
     //Pixelation
     if (_PixelationEnabled){
-        result *= CalculatePixelation();        
+        result *= CalculatePixelation(isRoof);        
     }
     else{
-        result *= texture(textures[_ActiveTexture],TexCoord).rgb;
+        if (isRoof)
+            result *= texture(textures[_ActiveTexture + 2],TexCoord).rgb;
+        else
+            result *= texture(textures[_ActiveTexture],TexCoord).rgb;
     }
 
     //Dithering
@@ -123,11 +132,14 @@ vec3 CalculateDitherCoordinate(vec3 color){
 }
 
 //Returns a scaled texture UV and color value
-vec3 CalculatePixelation(){
+vec3 CalculatePixelation(bool isRoof){
     vec2 uv = TexCoord;
     uv.x = floor(uv.x * _WidthPixelation) / _WidthPixelation;
     uv.y = floor(uv.y * _HeightPixelation) / _HeightPixelation;
-    color = texture(textures[_ActiveTexture], uv).rgb;
+    if (isRoof)
+        color = texture(textures[_ActiveTexture + 2], uv).rgb;
+    else
+        color = texture(textures[_ActiveTexture], uv).rgb;
     color = floor(color * _ColorPrecision) / _ColorPrecision;
 
     return color;

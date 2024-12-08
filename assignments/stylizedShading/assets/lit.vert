@@ -7,6 +7,7 @@ out vec3 WorldNormal;
 out vec2 TexCoord;
 out vec3 WorldPos;
 out vec4 ClipSpace;
+flat out int CubeFace; // 1 = right, 2 = left, 3 = front, 4 = back, 5 = top
 
 uniform mat4 _Model;
 uniform mat4 _ViewProjection;
@@ -27,16 +28,31 @@ void main(){
 	// if this is the left or right wall, we dont want to modify its uv
 	else if (aNormal.x != 0)
 	{
-		TexCoord = vec2(aUV.x, aUV.y);
+		vec2 rotatedUV;
+
+		// rotate uv coordinates to display texture at proper orientation
+		if (aNormal.x > 0)
+		{
+			rotatedUV = vec2(-aUV.y, aUV.x);
+		}
+		else
+		{
+			rotatedUV = vec2(aUV.y, -aUV.x);
+		}
+
+		CubeFace = 0;
+		TexCoord = vec2(rotatedUV.x, rotatedUV.y);
 	}
 	// if its the top face, we need to modify the v axis
 	else if (aNormal.y != 0)
 	{
 		TexCoord = vec2(aUV.x, aUV.y * _WallCount);
+		CubeFace = 5;
 	}
 	// if its the front or back face, we need to modify the u axis
 	else if (aNormal.z != 0)
 	{
+		CubeFace = 0;
 		TexCoord = vec2(aUV.x * _WallCount, aUV.y);
 	}
 	else
@@ -48,4 +64,3 @@ void main(){
 
 	gl_Position = ClipSpace;
 }
-
