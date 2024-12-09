@@ -234,9 +234,9 @@ int main() {
 	// shaders and textures
 	ew::Shader litShader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 
-	unsigned int wallTex = ew::loadTexture("assets/sethWall.png", GL_REPEAT, GL_NEAREST);
-	unsigned int floorTex = ew::loadTexture("assets/sethFloor.png", GL_REPEAT, GL_NEAREST);
-	unsigned int roofTex = ew::loadTexture("assets/sethRoof.png", GL_REPEAT, GL_NEAREST);
+	unsigned int wallTex = ew::loadTexture("assets/sethWallv2.png", GL_REPEAT, GL_NEAREST);
+	unsigned int floorTex = ew::loadTexture("assets/sethFloorv2.png", GL_REPEAT, GL_NEAREST);
+	unsigned int roofTex = ew::loadTexture("assets/sethRoofv2.png", GL_REPEAT, GL_NEAREST);
 
 	// Skybox
 	std::vector<std::string> faces
