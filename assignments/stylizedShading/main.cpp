@@ -308,8 +308,7 @@ int main() {
 		// Clear framebuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
+		
 		// Set light to follow player
 		lightTransform.position.x = cameraPos.x;
 		lightTransform.position.y = cameraPos.y + lightHeightOffset;
@@ -372,7 +371,6 @@ int main() {
 		litShader.setInt("_DitherEnabled", isDitherEnabled);
 		litShader.setFloat("_DitherThreshold", ditherThreshold);
 		litShader.setFloat("_DitherScale", ditherScale);
-		litShader.setFloat("_TexelSize", texelSize);
 		litShader.setInt("_DitherIndex", ditherIndex);
 		litShader.setFloat("_DitherNear", ditherNear);
 
@@ -490,8 +488,7 @@ int main() {
 				ImGui::InputFloat("Color Precision", &colorPrecision, 1, 256);
 				ImGui::Checkbox("Enable Dithering", &isDitherEnabled);
 				ImGui::InputFloat("Dither Threshold", &ditherThreshold, 0.1f);
-				ImGui::InputFloat("Dither Scale", &ditherScale, 0.1f);
-				ImGui::InputFloat("Texel Size", &texelSize, 0.1f);
+				ImGui::SliderFloat("Dither Scale", &ditherScale, 0, 5);
 				ImGui::SliderInt("Dither Pattern", &ditherIndex, 0, 4);
 				ImGui::SliderFloat("Dither Near Plane", &ditherNear, 0, 15);
 			}
@@ -499,8 +496,8 @@ int main() {
 
 		if (ImGui::CollapsingHeader("Fog Settings")) {
 			ImGui::Checkbox("Enable Fog", &isFogEnabled);
-			ImGui::InputFloat("Fog start", &fogStart);
-			ImGui::InputFloat("Fog end", &fogEnd);
+			ImGui::SliderFloat("Fog start", &fogStart, 0, 100);
+			ImGui::SliderFloat("Fog end", &fogEnd, 0, 100);
 			ImGui::SliderFloat("Fog density", &fogExponential, 0.0f, 10.0f);
 			ImGui::ColorEdit3("Fog Color", &fogColor.r);
 		}
@@ -594,7 +591,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	lastX = xpos;
 	lastY = ypos;
 
-	const float sensitivity = 0.1f;
+	const float sensitivity = 0.05f;
 	xoffset *= sensitivity;
 	yoffset *= sensitivity;
 
@@ -653,7 +650,7 @@ void handlePlayerMovement(GLFWwindow* window) {
 }
 
 void handleFreecamMovement(GLFWwindow* window) {
-	float cameraSpeed = 2.5f * deltaTime;
+	float cameraSpeed = 5.0f * deltaTime;
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		cameraSpeed *= 2.0f;
@@ -676,6 +673,15 @@ void handleFreecamMovement(GLFWwindow* window) {
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		cameraPos += cameraSpeed * camRight;
+	}
+
+
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		cameraPos += cameraSpeed * camUp;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		cameraPos -= cameraSpeed * camUp;
 	}
 }
 

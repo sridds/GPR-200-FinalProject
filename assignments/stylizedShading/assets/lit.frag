@@ -57,7 +57,7 @@ float CalculateFogFactor();
 uniform bool _DitherEnabled;
 uniform float _DitherThreshold;
 uniform float _DitherScale;
-uniform float _TexelSize;
+uniform float _TexelSize = 0.1;
 uniform int _DitherIndex;
 uniform float _DitherNear;
 
@@ -99,6 +99,7 @@ void main() {
         isRoof = true;
     }
 
+    //Calulate all lighting on materials
     vec3 result = CalculateLighting();
     
     //Fog
@@ -125,6 +126,7 @@ void main() {
             result = CalculateDitherCoordinate(result);
     }
 
+    //Output final result
 	FragColor = vec4(result, 1.0);
 }
 
@@ -133,10 +135,12 @@ float PixelBrightness(vec3 pixelColor){
     return pixelColor.r + pixelColor.g + pixelColor.b / 3.0;
 }
 
+//Scales down the current texture's pixel
 vec4 GetTexelSize(float width, float height){
     return vec4(1 / width, 1 / height, width, height);
 }
 
+//Returns what part of the pattern to display
 float Get4x4TexValue(vec2 uv, float brightness, mat4x4 pattern){
     int x = int(mod(uv.x, 4.0));
     int y = int(mod(uv.y, 4.0));
