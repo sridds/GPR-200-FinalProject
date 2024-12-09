@@ -41,7 +41,6 @@ uniform bool _PixelationEnabled = true;
 uniform float _WidthPixelation = 64;
 uniform float _HeightPixelation = 64;
 uniform float _ColorPrecision = 2;
-
 vec3 CalculatePixelation(vec3 pixelColor, bool isRoof);
 
 //Fog 
@@ -105,6 +104,8 @@ void main() {
     //Fog
     if (_FogEnabled){
         float fogFactor = CalculateFogFactor();
+
+        //Mix fog with current pixels based on fog density
         result = mix(_FogColor, result, pow(fogFactor, _FogExponential));
     }
 
@@ -113,6 +114,7 @@ void main() {
         result = CalculatePixelation(result, isRoof);        
     }
     else{
+        //If we don't use pixelation, apply texture to pixels
         if (isRoof)
            result *= texture(textures[_ActiveTexture + 2],TexCoord).rgb;
         else
@@ -142,10 +144,12 @@ vec4 GetTexelSize(float width, float height){
 
 //Returns what part of the pattern to display
 float Get4x4TexValue(vec2 uv, float brightness, mat4x4 pattern){
+    //Resize x and y
     int x = int(mod(uv.x, 4.0));
     int y = int(mod(uv.y, 4.0));
 
-    return brightness * _DitherThreshold < pattern[x][y] ? 0 : 1;
+    //If the total brightness value is less than the value at xy, dont apply dithering
+    return (brightness * _DitherThreshold) < pattern[x][y] ? 0 : 1;
 }
 
 vec3 CalculateDitherCoordinate(vec3 pixelColor){
@@ -173,6 +177,7 @@ vec3 CalculateDitherCoordinate(vec3 pixelColor){
 
 //Returns a scaled texture UV and color value
 vec3 CalculatePixelation(vec3 pixelColor, bool isRoof){
+    //Cache our texture coordinates
     vec2 uv = TexCoord;
 
     //Rescale texture coord resolution
@@ -216,6 +221,7 @@ vec3 CalculateLighting()
 
     if (_ToonShadingEnabled)
     {
+        //Floor the current diffuse intensity multiplied by the toon levels
         diffIntensity = floor(diffIntensity * _ToonLevels) * _ToonScale;
     }
    
