@@ -83,7 +83,7 @@ mat4x4 ditherPaterns[4] = mat4x4[4](
                         );
 
 float PixelBrightness(vec3 pixelColor);
-vec4 GetTexelSize(float width, float height);
+vec2 GetTexelSize(float width, float height);
 float Get4x4TexValue(vec2 uv, float brightness, mat4x4 pattern);
 vec3 CalculateDitherCoordinate(vec3 pixelColor);
 
@@ -138,8 +138,8 @@ float PixelBrightness(vec3 pixelColor){
 }
 
 //Scales down the current texture's pixel
-vec4 GetTexelSize(float width, float height){
-    return vec4(1 / width, 1 / height, width, height);
+vec2 GetTexelSize(float width, float height){
+    return vec2(1 / width, 1 / height);
 }
 
 //Returns what part of the pattern to display
@@ -154,13 +154,13 @@ float Get4x4TexValue(vec2 uv, float brightness, mat4x4 pattern){
 
 vec3 CalculateDitherCoordinate(vec3 pixelColor){
     //Get the size of our texel
-    vec4 texelSize = GetTexelSize(_TexelSize, _TexelSize);
+    vec2 texelSize = GetTexelSize(_TexelSize, _TexelSize);
     
     //Get screenspace coordinates (-1 to 1)
     vec2 screenCoordinate = ClipSpace.xy / ClipSpace.w;
 
     //Get the coordinate of our dithering
-    vec2 ditherCoordinate = screenCoordinate * texelSize.xy;
+    vec2 ditherCoordinate = screenCoordinate * texelSize;
 
     //Scale dithering
     ditherCoordinate /= _DitherScale;
@@ -184,15 +184,17 @@ vec3 CalculatePixelation(vec3 pixelColor, bool isRoof){
     uv.x = floor(uv.x * _WidthPixelation) / _WidthPixelation;
     uv.y = floor(uv.y * _HeightPixelation) / _HeightPixelation;
 
+    vec3 color;
+
     if (isRoof)
-     pixelColor *= texture(textures[_ActiveTexture + 2], uv).rgb;
+     color = texture(textures[_ActiveTexture + 2], uv).rgb;
     else
-      pixelColor *= texture(textures[_ActiveTexture], uv).rgb;
+      color = texture(textures[_ActiveTexture], uv).rgb;
 
     //Limit color palatte
-    pixelColor *= floor(pixelColor * _ColorPrecision) / _ColorPrecision;
+    color = floor(color * _ColorPrecision) / _ColorPrecision;
 
-    return pixelColor;
+    return color * pixelColor;
 }
 
 float CalculateFogFactor(){
