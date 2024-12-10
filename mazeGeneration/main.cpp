@@ -456,8 +456,8 @@ int main() {
 
 		// drawing "easter egg"
 		litShader.setInt("_ActiveTexture", 3);
-		sphereTransform.position = glm::vec3(WALL_SIZE, 1 + sin((float)glfwGetTime() * 3.0f) * 0.2f, 0.0f);
-		sphereTransform.scale = glm::vec3(0.4f);
+		sphereTransform.position = glm::vec3(WALL_SIZE, (1 + sin((float)glfwGetTime() * 3.0f) * 0.2f * WALL_HEIGHT) - (1 - WALL_HEIGHT), 0.0f);
+		sphereTransform.scale = glm::vec3(0.4f, 0.4f * WALL_HEIGHT, 0.4f);
 		sphereTransform.rotation = glm::vec3(0.0f, 1.0f, 0.0f);
 		sphereTransform.rotationAngle = (float)glfwGetTime() * 50.0f;
 
