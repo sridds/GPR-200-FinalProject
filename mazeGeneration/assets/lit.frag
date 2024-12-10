@@ -8,7 +8,7 @@ in vec2 TexCoord;
 flat in int CubeFace; // 1 = right, 2 = left, 3 = front, 4 = back, 5 = top
 
 // textures[0] is the wall and textures[1] is the floor
-uniform sampler2D textures[3];
+uniform sampler2D textures[4];
 uniform int _ActiveTexture;
 
 uniform vec3 _LightColor = vec3(1);

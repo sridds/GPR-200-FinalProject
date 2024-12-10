@@ -292,6 +292,7 @@ int main() {
 	unsigned int wallTex = ew::loadTexture("assets/textures/sethWallv2.png", GL_REPEAT, GL_NEAREST);
 	unsigned int floorTex = ew::loadTexture("assets/textures/sethFloorv2.png", GL_REPEAT, GL_NEAREST);
 	unsigned int roofTex = ew::loadTexture("assets/textures/sethRoofv2.png", GL_REPEAT, GL_NEAREST);
+	unsigned int easterEggTex = ew::loadTexture("assets/textures/seth.png", GL_REPEAT, GL_NEAREST);
 
 	// binding textures of maze to an array for easier usage in shader
 	glActiveTexture(GL_TEXTURE0);
@@ -302,6 +303,9 @@ int main() {
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, roofTex);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, easterEggTex);
 
 	// skybox textures
 	std::vector<std::string> faces
@@ -316,6 +320,15 @@ int main() {
 
 	unsigned int cubemapTexture = loadCubemap(faces);
 	ew::Shader skyboxShader = ew::Shader("assets/skybox.vert", "assets/skybox.frag");
+	#pragma endregion
+
+	#pragma region Easter Egg Initialization
+	Transform sphereTransform;
+	ew::MeshData sphereMeshData;
+
+	ew::createSphere(2.0f, 64, &sphereMeshData);
+	ew::Mesh sphereMesh = ew::Mesh(sphereMeshData);
+
 	#pragma endregion
 
 	#pragma region Skybox Initialization data
@@ -338,8 +351,8 @@ int main() {
 	litShader.use();
 	// texture unit array for switching between textures
 	GLint texturesLocation = glGetUniformLocation(litShader.getShaderID(), "textures");
-	int textureUnits[] = {0, 1, 2};
-	glUniform1iv(texturesLocation, 3, textureUnits);
+	int textureUnits[] = {0, 1, 2, 3};
+	glUniform1iv(texturesLocation, 4, textureUnits);
 
 	// player initial position
 	player.cellPos = glm::vec2(((MAZE_SIZE + 1) / 2.0f) - 1, ((MAZE_SIZE + 1) / 2.0f) - 1);
@@ -440,6 +453,17 @@ int main() {
 		// setting to floor texture
 		litShader.setInt("_ActiveTexture", 1);
 		planeMesh.draw(drawMode);
+
+		// drawing "easter egg"
+		litShader.setInt("_ActiveTexture", 3);
+		sphereTransform.position = glm::vec3(WALL_SIZE, 1 + sin((float)glfwGetTime() * 3.0f) * 0.2f, 0.0f);
+		sphereTransform.scale = glm::vec3(0.4f);
+		sphereTransform.rotation = glm::vec3(0.0f, 1.0f, 0.0f);
+		sphereTransform.rotationAngle = (float)glfwGetTime() * 50.0f;
+
+		litShader.setMat4("_Model", sphereTransform.getModelMatrix());
+		sphereMesh.draw(drawMode);
+
 		// setting to wall texture
 		litShader.setInt("_ActiveTexture", 0);
 		#pragma endregion
