@@ -247,13 +247,6 @@ vec3 CalculateLighting()
         vec3 reflectDir = reflect(-lightDir, norm);
         spec = pow(max(dot(viewDir, reflectDir), 0.0),  _Material.shininess);
     }
-    else
-    {
-        //Toon shading specular
-        vec3 halfwayDir = normalize(lightDir + viewDir);  
-        specularStrength = clamp(dot(norm, halfwayDir), 0.0, 1.0);
-        specularStrength = step(0.98, specularStrength);
-    }
 
     vec3 specular = specularStrength * spec * _LightColor;  
 
