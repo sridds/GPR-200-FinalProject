@@ -855,7 +855,9 @@ void updateMaze(int newMazeNumber)
 
 		// update global
 		currentMazeNumber = newMazeNumber;
-		// SETH PUT RESPAWN TO CENTER OF MAZE FUNCTION HERE
+		// Immedaitely set the position of the player to the center of the maze. ensure the cell pos is also updated accordingly
+		player.setPositionImmediate(glm::vec3(mazeCenterX, 1.0f, mazeCenterZ - (WALL_SIZE)));
+		player.cellPos = glm::vec2(((MAZE_SIZE + 1) / 2.0f) - 1, ((MAZE_SIZE + 1) / 2.0f) - 1);
 	}
 }
 #pragma endregion

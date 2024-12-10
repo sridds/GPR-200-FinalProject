@@ -41,6 +41,8 @@ public:
 	glm::vec2 getProjectedForwardCell();
 	glm::vec2 getProjectedBackwardCell();
 
+	void setPositionImmediate(glm::vec3 startPosition);
+
 	bool isMoving();
 	bool isTurning();
 	int getDirection();

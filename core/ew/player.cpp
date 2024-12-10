@@ -22,7 +22,7 @@ int Player::getDirection() {
 
 void Player::moveForward()
 {
-	if(m_isMoving || m_isTurning) return;
+	if (m_isMoving || m_isTurning) return;
 
 	m_targetPosition = m_transform.position + (getFrontDir() * 2.0f);
 	m_startPosition = m_transform.position;
@@ -86,7 +86,7 @@ glm::vec2 Player::getProjectedBackwardCell() {
 
 void Player::turnLeft()
 {
-	if(m_isMoving || m_isTurning) return;
+	if (m_isMoving || m_isTurning) return;
 
 	m_direction--;
 	m_direction %= 4;
@@ -102,7 +102,7 @@ void Player::turnLeft()
 
 void Player::turnRight()
 {
-	if(m_isMoving || m_isTurning) return;
+	if (m_isMoving || m_isTurning) return;
 
 	m_direction++;
 	m_direction %= 4;
@@ -116,10 +116,17 @@ void Player::turnRight()
 	m_isTurning = true;
 }
 
-void Player::update(float deltaTime) 
+void Player::update(float deltaTime)
 {
 	updatePos(deltaTime);
 	updateRot(deltaTime);
+}
+
+void Player::setPositionImmediate(glm::vec3 startPosition)
+{
+	m_transform.position = startPosition;
+	m_startPosition = startPosition;
+	m_targetPosition = startPosition;
 }
 
 void Player::updatePos(float deltaTime)
