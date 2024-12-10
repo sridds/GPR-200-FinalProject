@@ -30,7 +30,7 @@ const int MAZE_SIZE = 19;
 float WALL_SIZE = 1.0f;
 float WALL_HEIGHT = 1.0f;
 
-float tempMaze[19][19] = {
+float maze1[19][19] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1},
@@ -52,6 +52,54 @@ float tempMaze[19][19] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
 
+float maze2[19][19] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+};
+
+float maze3[19][19] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1},
+	{1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1},
+	{1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+	{1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+};
+
+float currentMaze[19][19];
+int currentMazeNumber = 0;
+
+
 // calculating center of maze for camera start pos
 float mazeCenterX = (((float)MAZE_SIZE) / 2.0f) * WALL_SIZE * 2.0f;
 float mazeCenterZ = (((float)MAZE_SIZE) / 2.0f) * WALL_SIZE * 2.0f;
@@ -67,9 +115,8 @@ unsigned int loadCubemap(std::vector<std::string> faces);
 void handlePlayerMovement(GLFWwindow* window);
 void handleFreecamMovement(GLFWwindow* window);
 
-// mesh functions
-void createCubeMaze(float size, ew::MeshData* mesh);
-static void createCubeFaceMaze(const glm::vec3& normal, float size, ew::MeshData* mesh);
+// maze functions
+void updateMaze(int currentMazeNumber);
 
 // Player
 Player player = Player(0.4f, glm::vec3(mazeCenterX, 1.0f, mazeCenterZ - (WALL_SIZE)));
@@ -222,6 +269,7 @@ int main() {
 	// temp meshes not yet dealt with
 	ew::MeshData planeMeshData;
 	// plane sits under maze, set to the size of the maze
+	int mazeNumber = 1;
 	float mazeLength = (MAZE_SIZE * (WALL_SIZE * 2)) / 3.0f;
 	ew::createPlaneXY(mazeLength, mazeLength, 5, &planeMeshData);
 	ew::Mesh planeMesh = ew::Mesh(planeMeshData);
@@ -289,8 +337,7 @@ int main() {
 
 	GLint texturesLocation = glGetUniformLocation(litShader.getShaderID(), "textures");
 	int textureUnits[] = {0, 1, 2};
-	glUniform1iv(texturesLocation, 3
-		, textureUnits);
+	glUniform1iv(texturesLocation, 3, textureUnits);
 
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", 0);
@@ -389,6 +436,8 @@ int main() {
 		// if wall size is changed, scale the plane with it
 		planeTransform.scale = glm::vec3(3.0f * WALL_SIZE, 3.0f * WALL_SIZE, 1.0f);
 
+		updateMaze(mazeNumber);
+
 		#pragma region Draw Maze
 		// reading through tempMaze matrix
 		for (int row = 0; row < MAZE_SIZE; row++)
@@ -397,7 +446,7 @@ int main() {
 			while (col < MAZE_SIZE)
 			{
 				// if it is an empty space in the maze, we dont draw a square
-				if (tempMaze[row][col] == 0)
+				if (currentMaze[row][col] == 0)
 				{
 					col++;
 					continue;
@@ -405,7 +454,7 @@ int main() {
 
 				int wallCount = 1;
 				// tracking wall count and ensuring we dont somehow exceed the size of the maze
-				while (col + wallCount < MAZE_SIZE && tempMaze[row][col + wallCount] == 1)
+				while (col + wallCount < MAZE_SIZE && currentMaze[row][col + wallCount] == 1)
 				{
 					wallCount++;
 				}
@@ -506,6 +555,7 @@ int main() {
 
 		if (ImGui::CollapsingHeader("Maze Settings")) {
 			ImGui::SliderFloat("Wall Height", &WALL_HEIGHT, 0.2f, 3.5f);
+			ImGui::SliderInt("Maze Pattern", &mazeNumber, 1, 3);
 		}
 		ImGui::End();
 
@@ -622,7 +672,7 @@ void handlePlayerMovement(GLFWwindow* window) {
 		int x = cell.x;
 		int y = cell.y;
 
-		float val = tempMaze[x][y];
+		float val = currentMaze[x][y];
 
 		if (val == 0) {
 			player.moveForward();
@@ -635,7 +685,7 @@ void handlePlayerMovement(GLFWwindow* window) {
 		int x = cell.x;
 		int y = cell.y;
 
-		float val = tempMaze[x][y];
+		float val = currentMaze[x][y];
 
 		if (val == 0) {
 			player.moveBackward();
@@ -726,5 +776,48 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	return textureID;
+}
+
+// updating current maze only if global maze number changes
+void updateMaze(int newMazeNumber) 
+{
+	if (newMazeNumber != currentMazeNumber) 
+	{
+		switch (newMazeNumber) 
+		{
+		case 1:
+			for (int i = 0; i < MAZE_SIZE; i++) 
+			{
+				for (int j = 0; j < MAZE_SIZE; j++) 
+				{
+					currentMaze[i][j] = maze1[i][j];
+				}
+			}
+			break;
+		case 2:
+			for (int i = 0; i < MAZE_SIZE; i++) 
+			{
+				for (int j = 0; j < MAZE_SIZE; j++) 
+				{
+					currentMaze[i][j] = maze2[i][j];
+				}
+			}
+			break;
+		case 3:
+			for (int i = 0; i < MAZE_SIZE; i++) 
+			{
+				for (int j = 0; j < MAZE_SIZE; j++) 
+				{
+					currentMaze[i][j] = maze3[i][j];
+				}
+			}
+			break;
+		default:
+			break;
+		}
+
+		// update global
+		currentMazeNumber = newMazeNumber;
+	}
 }
 #pragma endregion
