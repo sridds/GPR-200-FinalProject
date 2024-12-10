@@ -20,10 +20,14 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+// Main.cpp authored by Seth Riddensdale, Brody Silva, and Christopher Eichert
+
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
 
+
 #pragma region Maze Settings
+// Maze Settings By Brody Silva
 // maze global variables
 const int MAZE_SIZE = 19;
 int currentMazeNumber = 0;
@@ -115,6 +119,7 @@ void updateMaze(int currentMazeNumber);
 #pragma endregion
 
 #pragma region Player and Camera variables
+// Player by Seth Riddensdale
 // Player
 Player player = Player(0.4f, glm::vec3(mazeCenterX, 1.0f, mazeCenterZ - (WALL_SIZE)));
 
@@ -137,6 +142,7 @@ float orthoHeight = 10.0f;
 #pragma endregion
 
 #pragma region Lighting Settings
+// Lighting by Christopher Eichert
 glm::vec3 lightColor = glm::vec3(1);
 struct Material {
 	float ambientK = 0.65f;
@@ -264,6 +270,7 @@ int main() {
 	#pragma endregion
 
 	#pragma region Transforms, Meshes, and Shaders
+	// Object transforms, texture loading, and meshes by Brody Silva
 	Transform lightTransform;
 	Transform planeTransform;
 	Transform mazeTransform;
@@ -307,6 +314,7 @@ int main() {
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, easterEggTex);
 
+	// Skybox by Seth Riddensdale
 	// skybox textures
 	std::vector<std::string> faces
 	{
@@ -323,6 +331,7 @@ int main() {
 	#pragma endregion
 
 	#pragma region Easter Egg Initialization
+	// Easter Egg by Brody Silva
 	Transform sphereTransform;
 	ew::MeshData sphereMeshData;
 
@@ -332,6 +341,7 @@ int main() {
 	#pragma endregion
 
 	#pragma region Skybox Initialization data
+	// Skybox by Seth Riddensdale
 	// skybox VAO
 	unsigned int skyboxVAO, skyboxVBO;
 	glGenVertexArrays(1, &skyboxVAO);
@@ -384,6 +394,7 @@ int main() {
 		#pragma endregion
 
 		#pragma region Light Transform
+		// Light following player by Christopher Eichert
 		// set light to follow player
 		lightTransform.position.x = cameraPos.x;
 		lightTransform.position.y = cameraPos.y + lightHeightOffset;
@@ -391,6 +402,7 @@ int main() {
 		#pragma endregion
 
 		#pragma region Camera Switch
+		// Player to Free Cam Switch by Seth Riddensdale
 		player.update(deltaTime);
 
 		if (freeCamEnabled) 
@@ -408,6 +420,7 @@ int main() {
 		#pragma endregion
 
 		#pragma region Shader Programs
+		// Lighting Settings by Christopher Eichert
 		//Set lighting settings
 		litShader.use();
 		litShader.setVec3("_ViewPos", cameraPos);
@@ -447,6 +460,7 @@ int main() {
 		litShader.setInt("_DitherIndex", ditherIndex);
 		litShader.setFloat("_DitherNear", ditherNear);
 
+		// Plane settings and Active Textures by Brody Silva
 		//Drawing plane
 		litShader.setMat4("_Model", planeTransform.getModelMatrix());
 		litShader.setInt("_MazeSize", MAZE_SIZE);
@@ -471,6 +485,7 @@ int main() {
 		#pragma region Draw Maze
 		updateMaze(mazeNumber);
 
+		// Rendering Maze by Brody Silva
 		// reading through tempMaze matrix
 		for (int row = 0; row < MAZE_SIZE; row++)
 		{
@@ -512,6 +527,7 @@ int main() {
 		#pragma endregion
 
 		#pragma region Draw Skybox
+		// Skybox Render by Seth Riddensdale
 		if (freeCamEnabled) 
 		{
 			skyView = glm::lookAt(glm::vec3(0), glm::vec3(0) + cameraFront, cameraUp);
@@ -541,6 +557,7 @@ int main() {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
+		// ImGui Settings by Christopher Eichert
 		//Create a window called Settings.
 		ImGui::Begin("Settings");
 
@@ -589,6 +606,7 @@ int main() {
 			ImGui::ColorEdit3("Fog Color", &fogColor.r);
 		}
 
+		// Maze Settings by Brody Silva
 		if (ImGui::CollapsingHeader("Maze Settings")) {
 			ImGui::SliderFloat("Wall Height", &WALL_HEIGHT, 0.2f, 3.5f);
 			ImGui::SliderInt("Maze Pattern", &mazeNumber, 1, 3);
@@ -611,6 +629,8 @@ int main() {
 #pragma endregion
 
 #pragma region Functions
+
+// Input Functions from OpenGL tutorials modified by Seth Riddensdale
 bool isKey = false;
 
 void processInput(GLFWwindow* window)
@@ -700,6 +720,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	cameraFront = glm::normalize(direction);
 }
 
+// handlePlayerMovement and handleFreecamMovement by Seth Riddensdale
 void handlePlayerMovement(GLFWwindow* window) {
 	if (player.isMoving() || player.isTurning()) return;
 
@@ -783,6 +804,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 		fov = 90.0f;
 }
 
+// by Seth Riddensdale (OpenGL tutorial)
 unsigned int loadCubemap(std::vector<std::string> faces)
 {
 	stbi_set_flip_vertically_on_load(false);
@@ -815,6 +837,7 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 	return textureID;
 }
 
+// updateMaze by Brody Silva
 // updating current maze only if global maze number changes
 void updateMaze(int newMazeNumber) 
 {
@@ -856,6 +879,7 @@ void updateMaze(int newMazeNumber)
 		// update global
 		currentMazeNumber = newMazeNumber;
 		// Immedaitely set the position of the player to the center of the maze. ensure the cell pos is also updated accordingly
+		// Reset Player Pos by Seth Riddensdale
 		player.setPositionImmediate(glm::vec3(mazeCenterX, 1.0f, mazeCenterZ - (WALL_SIZE)));
 		player.cellPos = glm::vec2(((MAZE_SIZE + 1) / 2.0f) - 1, ((MAZE_SIZE + 1) / 2.0f) - 1);
 	}

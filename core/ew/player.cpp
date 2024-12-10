@@ -1,3 +1,5 @@
+// Authored by Seth Riddensdale
+
 #include "player.h"
 #include <iostream>
 

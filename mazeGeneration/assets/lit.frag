@@ -1,3 +1,5 @@
+// Authored by Christopher Eichert and Brody Silva
+
 #version 330 core
 out vec4 FragColor;
 

@@ -1,3 +1,5 @@
+// Authored by Seth Riddensdale
+
 #include "transform.h"
 
 class Player {

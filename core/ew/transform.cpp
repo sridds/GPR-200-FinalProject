@@ -1,3 +1,5 @@
+// Authored by Christopher Eichert
+
 #include "transform.h"
 
 Transform::Transform() {
